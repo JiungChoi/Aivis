@@ -1,0 +1,28 @@
+# Frontend
+src/frontend/node_modules/
+src/frontend/dist/
+src/frontend/.env
+src/frontend/.env.local
+
+# Backend
+src/backend/**/bin/
+src/backend/**/obj/
+src/backend/**/*.user
+src/backend/**/*.suo
+src/backend/.env
+src/backend/appsettings.Local.json
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp

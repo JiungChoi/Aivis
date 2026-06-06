@@ -1,0 +1,68 @@
+services:
+  postgres:
+    build:
+      context: ./infra/postgres
+      dockerfile: Dockerfile
+    container_name: aivis-postgres
+    environment:
+      POSTGRES_DB: aivis
+      POSTGRES_USER: aivis
+      POSTGRES_PASSWORD: aivis1234
+    ports:
+      - "5432:5432"
+    volumes:
+      - aivis-postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  whisper-asr:
+    image: onerahmet/openai-whisper-asr-webservice:latest
+    container_name: aivis-whisper-asr
+    environment:
+      ASR_MODEL: base
+      ASR_ENGINE: openai_whisper
+    ports:
+      - "9000:9000"
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: aivis-backend
+    ports:
+      - "5050:5050"
+    environment:
+      DATABASE__CONNECTIONSTRING: "Host=postgres;Port=5432;Database=aivis;Username=aivis;Password=aivis1234"
+      OLLAMA__BASEURL: "http://host.docker.internal:11434"
+      OLLAMA__MODEL: "llama3.2"
+      WHISPER__SERVICEURL: "http://whisper-asr:9000"
+      WHISPER__LANGUAGE: "ko"
+      TTS__VOICE: "ko-KR-SunHiNeural"
+      APP__PORT: "5050"
+      ASPNETCORE_URLS: "http://+:5050"
+      OBSIDIAN__VAULTPATH: "/vault"
+      OBSIDIAN__ENABLED: "true"
+    volumes:
+      - "${HOME}/Documents/AIVIS:/vault"
+    depends_on:
+      - postgres
+      - whisper-asr
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: aivis-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/vite.config.ts:/app/vite.config.ts
+      - ./frontend/tailwind.config.js:/app/tailwind.config.js
+      - ./frontend/postcss.config.js:/app/postcss.config.js
+    restart: unless-stopped
+
+volumes:
+  aivis-postgres-data:
