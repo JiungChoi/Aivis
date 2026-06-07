@@ -34,6 +34,10 @@ public record TextDelta(string Text) : LlmChunk;
 public record ToolCallChunk(string Name, Dictionary<string, JsonElement> Arguments) : LlmChunk;
 public record LlmStreamDone() : LlmChunk;
 
+// ── 메시지 내 도구 호출 직렬화 (provider-agnostic 히스토리 인코딩) ─
+public record EncodedToolCall(string Id, string Name, JsonElement Input);
+public record EncodedToolResult(string ToolUseId, string Content);
+
 // ── Agent 이벤트 (SSE 로 프론트에 전달) ──────────────────────
 public abstract record AgentEvent;
 public record AgentTextDelta(string Delta) : AgentEvent;

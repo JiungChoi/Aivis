@@ -51,10 +51,22 @@ public static class InfrastructureExtensions
         });
 
         services.Configure<OllamaConfig>(configuration.GetSection(OllamaConfig.Section));
-        services.AddHttpClient<ILlmService, OllamaService>()
-                .SetHandlerLifetime(TimeSpan.FromMinutes(10));
-
+        services.Configure<AnthropicConfig>(configuration.GetSection(AnthropicConfig.Section));
         services.AddTransient<ClaudeMessageHandler>();
+
+        var llmProvider = configuration["Llm:Provider"] ?? "ollama";
+        if (llmProvider.Equals("claude", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddHttpClient<ILlmService, ClaudeLlmService>()
+                    .AddHttpMessageHandler<ClaudeMessageHandler>()
+                    .SetHandlerLifetime(TimeSpan.FromMinutes(10));
+        }
+        else
+        {
+            services.AddHttpClient<ILlmService, OllamaService>()
+                    .SetHandlerLifetime(TimeSpan.FromMinutes(10));
+        }
+
         services.AddHttpClient<IClaudeService, ClaudeService>()
                 .AddHttpMessageHandler<ClaudeMessageHandler>();
 

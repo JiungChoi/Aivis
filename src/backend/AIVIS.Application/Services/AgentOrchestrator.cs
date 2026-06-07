@@ -14,6 +14,7 @@ public class AgentOrchestrator(
     IScheduleRepository scheduleRepository,
     IMemoryRepository memoryRepository,
     INoteRepository noteRepository,
+    ITodoRepository todoRepository,
     IObsidianService obsidianService)
 {
     private const int MaxToolRounds = 3;
@@ -80,6 +81,41 @@ public class AgentOrchestrator(
             {
                 ["query"] = new("string", "검색 키워드"),
             }, ["query"]))),
+
+        new("function", new ToolFunction(
+            "delete_memory",
+            "저장된 기억을 키(key)로 찾아 삭제합니다. 잘못된 기억을 지울 때 사용하세요.",
+            new ToolParameters("object", new()
+            {
+                ["key"] = new("string", "삭제할 기억의 키 (get_memories로 확인 가능)"),
+            }, ["key"]))),
+
+        new("function", new ToolFunction(
+            "create_todo",
+            "할 일(Todo)을 새로 추가합니다. 오늘 할 일, 작업 계획, 리마인더 등을 만들 때 사용하세요.",
+            new ToolParameters("object", new()
+            {
+                ["title"]       = new("string", "할 일 제목"),
+                ["description"] = new("string", "상세 설명 (선택)"),
+                ["priority"]    = new("string", "우선순위", ["Low", "Normal", "High"]),
+                ["due_date"]    = new("string", "마감일 (yyyy-MM-dd, 선택)"),
+            }, ["title"]))),
+
+        new("function", new ToolFunction(
+            "get_todos",
+            "현재 할 일 목록을 조회합니다. 완료 여부로 필터할 수 있습니다.",
+            new ToolParameters("object", new()
+            {
+                ["filter"] = new("string", "필터: 'all'(기본), 'pending'(미완료), 'completed'(완료)", ["all", "pending", "completed"]),
+            }, []))),
+
+        new("function", new ToolFunction(
+            "complete_todo",
+            "할 일을 완료 처리합니다. 먼저 get_todos로 ID를 확인하세요.",
+            new ToolParameters("object", new()
+            {
+                ["todo_id"] = new("string", "완료 처리할 할 일 ID"),
+            }, ["todo_id"]))),
     ];
 
     // ── 메인 오케스트레이션 루프 ─────────────────────────────
@@ -88,7 +124,8 @@ public class AgentOrchestrator(
         string userId,
         [EnumeratorCancellation] CancellationToken ct = default)
     {
-        var messages = history.ToList();
+        var messages     = history.ToList();
+        var toolsInvoked = false;
 
         for (var round = 0; round < MaxToolRounds; round++)
         {
@@ -96,25 +133,34 @@ public class AgentOrchestrator(
 
             if (!response.HasToolCalls)
             {
-                if (!string.IsNullOrEmpty(response.TextContent))
+                // First round, no tools needed: emit text directly (avoids redundant LLM call)
+                if (!toolsInvoked && !string.IsNullOrEmpty(response.TextContent))
                 {
                     yield return new AgentTextDelta(response.TextContent);
                     yield return new AgentDone(response.TextContent);
                     yield break;
                 }
 
+                // After tool execution: stream for proper incremental UX
                 await foreach (var ev in StreamFinalResponseAsync(messages, ct))
                     yield return ev;
                 yield break;
             }
 
-            messages.Add(new ChatMessage("assistant", string.Empty));
+            toolsInvoked = true;
+
+            // Encode full tool call metadata so each LLM adapter can reconstruct its native format
+            var encoded = response.ToolCalls
+                .Select(tc => new EncodedToolCall(tc.Id, tc.Name, tc.RawArguments))
+                .ToList();
+            messages.Add(new ChatMessage("assistant", JsonSerializer.Serialize(encoded)));
 
             foreach (var toolCall in response.ToolCalls)
             {
                 yield return new AgentToolCalling(toolCall.Name, GetToolDisplayText(toolCall.Name));
                 var result = await ExecuteToolAsync(toolCall.Name, toolCall.RawArguments, userId, ct);
-                messages.Add(new ChatMessage("tool", result));
+                messages.Add(new ChatMessage("tool", JsonSerializer.Serialize(
+                    new EncodedToolResult(toolCall.Id, result))));
             }
 
             if (round == MaxToolRounds - 1)
@@ -160,6 +206,10 @@ public class AgentOrchestrator(
                 "get_memories"    => await GetMemoriesAsync(userId, ct),
                 "save_note"       => await SaveNoteAsync(args, userId, ct),
                 "search_notes"    => await SearchNotesAsync(args, userId, ct),
+                "delete_memory"   => await DeleteMemoryAsync(args, userId, ct),
+                "create_todo"     => await CreateTodoAsync(args, userId, ct),
+                "get_todos"       => await GetTodosAsync(args, userId, ct),
+                "complete_todo"   => await CompleteTodoAsync(args, userId, ct),
                 _                 => $"알 수 없는 도구: {name}",
             };
         }
@@ -285,6 +335,97 @@ public class AgentOrchestrator(
         return $"'{query}' 검색 결과 ({notes.Count}건):\n{string.Join('\n', lines)}";
     }
 
+    private async Task<string> DeleteMemoryAsync(JsonElement args, string userId, CancellationToken ct)
+    {
+        var key = GetString(args, "key");
+        if (string.IsNullOrWhiteSpace(key)) return "삭제할 기억의 키를 입력해주세요.";
+
+        var memory = await memoryRepository.GetByKeyAsync(userId, key, ct);
+        if (memory is null)
+            return $"'{key}' 키의 기억을 찾을 수 없습니다.";
+
+        await memoryRepository.DeleteAsync(memory.Id, ct);
+        return $"기억 삭제 완료: {key}";
+    }
+
+    private async Task<string> CreateTodoAsync(JsonElement args, string userId, CancellationToken ct)
+    {
+        var title    = GetString(args, "title") ?? "할 일";
+        var desc     = GetString(args, "description");
+        var priority = GetString(args, "priority") ?? "Normal";
+        var dueDateStr = GetString(args, "due_date");
+
+        if (!Enum.TryParse<TodoPriority>(priority, ignoreCase: true, out var prio))
+            prio = TodoPriority.Normal;
+
+        DateTime? dueDate = null;
+        if (!string.IsNullOrWhiteSpace(dueDateStr) && DateTime.TryParse(dueDateStr, out var parsed))
+            dueDate = parsed.ToUniversalTime();
+
+        var todo = new AIVIS.Domain.Models.Entities.Todo
+        {
+            Id          = Guid.NewGuid().ToString(),
+            UserId      = userId,
+            Title       = title,
+            Description = desc,
+            Priority    = prio,
+            DueDate     = dueDate,
+            CreatedAt   = DateTime.UtcNow,
+            UpdatedAt   = DateTime.UtcNow,
+        };
+        await todoRepository.CreateAsync(todo, ct);
+
+        var due = dueDate.HasValue ? $" (마감: {dueDate.Value:yyyy-MM-dd})" : string.Empty;
+        return $"할 일 추가 완료: '{title}'{due} [{prio}]";
+    }
+
+    private async Task<string> GetTodosAsync(JsonElement args, string userId, CancellationToken ct)
+    {
+        var filter = GetString(args, "filter") ?? "all";
+        var todos  = await todoRepository.GetByUserIdAsync(userId, ct);
+
+        var filtered = filter switch
+        {
+            "pending"   => todos.Where(t => !t.IsCompleted).ToList(),
+            "completed" => todos.Where(t =>  t.IsCompleted).ToList(),
+            _           => todos.ToList(),
+        };
+
+        if (filtered.Count == 0)
+            return filter == "completed" ? "완료된 할 일이 없습니다." : "할 일이 없습니다.";
+
+        var lines = filtered.Select(t =>
+        {
+            var status  = t.IsCompleted ? "✓" : "○";
+            var due     = t.DueDate.HasValue ? $" ~{t.DueDate.Value:MM/dd}" : string.Empty;
+            var prio    = t.Priority != TodoPriority.Normal ? $" [{t.Priority}]" : string.Empty;
+            return $"{status} [{t.Id[..8]}] {t.Title}{due}{prio}";
+        });
+        return $"할 일 목록 ({filtered.Count}건):\n{string.Join('\n', lines)}";
+    }
+
+    private async Task<string> CompleteTodoAsync(JsonElement args, string userId, CancellationToken ct)
+    {
+        var idStr = GetString(args, "todo_id");
+        if (string.IsNullOrWhiteSpace(idStr)) return "할 일 ID를 입력해주세요.";
+
+        // Try exact match first, then prefix match (AI may pass shortened 8-char prefix)
+        var todo = await todoRepository.GetByIdAsync(idStr, ct);
+        if (todo is null)
+        {
+            var all = await todoRepository.GetByUserIdAsync(userId, ct);
+            todo = all.FirstOrDefault(t => t.Id.StartsWith(idStr, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (todo is null)
+            return $"할 일을 찾을 수 없습니다 (ID: {idStr}).";
+
+        todo.IsCompleted = true;
+        todo.UpdatedAt   = DateTime.UtcNow;
+        await todoRepository.UpdateAsync(todo, ct);
+        return $"완료 처리: '{todo.Title}'";
+    }
+
     // ── 헬퍼 ─────────────────────────────────────────────────
     private static string? GetString(JsonElement obj, string key)
     {
@@ -321,6 +462,10 @@ public class AgentOrchestrator(
         "get_memories"    => "🧠 기억 불러오는 중...",
         "save_note"       => "📝 노트 저장 중...",
         "search_notes"    => "🔍 노트 검색 중...",
+        "delete_memory"   => "🧠 기억 삭제 중...",
+        "create_todo"     => "✅ 할 일 추가 중...",
+        "get_todos"       => "📋 할 일 조회 중...",
+        "complete_todo"   => "✅ 할 일 완료 처리 중...",
         _                 => $"⚙️ {toolName} 실행 중...",
     };
 }

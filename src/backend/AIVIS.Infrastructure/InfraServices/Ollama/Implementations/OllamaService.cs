@@ -36,7 +36,7 @@ public class OllamaService : ILlmService
         {
             model = _config.Model,
             stream = false,
-            messages = messages,
+            messages = ToOllamaMessages(messages),
             tools = tools,
         };
 
@@ -51,6 +51,7 @@ public class OllamaService : ILlmService
         if (msg?.ToolCalls is { Count: > 0 } calls)
         {
             var toolResults = calls.Select(tc => new LlmToolCallResult(
+                Guid.NewGuid().ToString(),
                 tc.Function.Name,
                 tc.Function.Arguments)).ToList();
             return new LlmNonStreamResponse(null, toolResults);
@@ -68,7 +69,7 @@ public class OllamaService : ILlmService
         {
             model = _config.Model,
             stream = true,
-            messages = messages,
+            messages = ToOllamaMessages(messages),
         };
 
         var request = new HttpRequestMessage(HttpMethod.Post, $"{_config.BaseUrl}/api/chat")
@@ -93,6 +94,62 @@ public class OllamaService : ILlmService
             if (chunk?.Message?.Content is { Length: > 0 } delta)
                 yield return new TextDelta(delta);
         }
+    }
+
+    // ── EncodedToolCall/EncodedToolResult → Ollama 형식 변환 ──
+    private static List<object> ToOllamaMessages(IReadOnlyList<ChatMessage> messages)
+    {
+        var result = new List<object>();
+        foreach (var msg in messages)
+        {
+            if (msg.Role == "assistant" && TryParseToolCalls(msg.Content, out var toolCalls))
+            {
+                result.Add(new
+                {
+                    role = "assistant",
+                    content = (string?)null,
+                    tool_calls = toolCalls.Select(tc => new
+                    {
+                        function = new { name = tc.Name, arguments = tc.Input }
+                    }).ToList(),
+                });
+            }
+            else if (msg.Role == "tool" && TryParseToolResult(msg.Content, out var toolResult))
+            {
+                result.Add(new { role = "tool", content = toolResult.Content });
+            }
+            else
+            {
+                result.Add(new { role = msg.Role, content = msg.Content });
+            }
+        }
+        return result;
+    }
+
+    private static bool TryParseToolCalls(string content, out List<EncodedToolCall> calls)
+    {
+        calls = [];
+        if (string.IsNullOrWhiteSpace(content) || !content.StartsWith('[')) return false;
+        try
+        {
+            calls = JsonSerializer.Deserialize<List<EncodedToolCall>>(content, JsonOpts) ?? [];
+            return calls.Count > 0;
+        }
+        catch { return false; }
+    }
+
+    private static bool TryParseToolResult(string content, out EncodedToolResult result)
+    {
+        result = new EncodedToolResult(string.Empty, content);
+        if (string.IsNullOrWhiteSpace(content) || !content.StartsWith('{')) return false;
+        try
+        {
+            var parsed = JsonSerializer.Deserialize<EncodedToolResult>(content, JsonOpts);
+            if (parsed is null) return false;
+            result = parsed;
+            return true;
+        }
+        catch { return false; }
     }
 }
 

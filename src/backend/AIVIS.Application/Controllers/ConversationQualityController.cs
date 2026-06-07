@@ -10,8 +10,11 @@ namespace AIVIS.Application.Controllers;
 public class ConversationQualityController(
     ConversationQualityService qualityService,
     IUserRepository userRepository,
-    IMemoryRepository memoryRepository)
+    IMemoryRepository memoryRepository,
+    IScheduleRepository scheduleRepository)
 {
+    private const int MaxHistoryMessages = 30;
+
     public async Task<IReadOnlyList<ChatMessage>> PrepareHistoryAsync(
         string userId,
         IReadOnlyList<Message> dbHistory,
@@ -22,7 +25,12 @@ public class ConversationQualityController(
 
         var result = new List<ChatMessage> { new("system", systemContent) };
 
-        foreach (var m in dbHistory)
+        // Sliding window: keep only the most recent messages to avoid context overflow
+        var window = dbHistory.Count > MaxHistoryMessages
+            ? dbHistory.Skip(dbHistory.Count - MaxHistoryMessages).ToList()
+            : dbHistory;
+
+        foreach (var m in window)
         {
             var role = m.Role switch
             {
@@ -38,18 +46,28 @@ public class ConversationQualityController(
 
     private async Task<UserPreferences> LoadPreferencesAsync(string userId, CancellationToken ct)
     {
-        var user = await userRepository.GetByIdAsync(userId, ct);
-        var memories = await memoryRepository.ListByUserAsync(userId, ct);
-        var entries = memories.Select(m => new MemoryEntry(m.Key, m.Value)).ToList();
+        var user      = await userRepository.GetByIdAsync(userId, ct);
+        var memories  = await memoryRepository.ListByUserAsync(userId, ct);
+        var entries   = memories.Select(m => new MemoryEntry(m.Key, m.Value)).ToList();
+
+        var today        = DateOnly.FromDateTime(DateTime.Today);
+        var currentTime  = TimeOnly.FromDateTime(DateTime.Now);
+        var schedules    = await scheduleRepository.GetByDateAsync(userId, today, ct);
+        var todayEntries = schedules
+            .Where(s => s.StartTime >= currentTime)
+            .OrderBy(s => s.StartTime)
+            .Select(s => new ScheduleEntry(s.StartTime.ToString("HH:mm"), s.Title, s.Category.ToString()))
+            .ToList();
 
         if (user is null)
-            return UserPreferences.Default with { Memories = entries };
+            return UserPreferences.Default with { Memories = entries, TodaySchedules = todayEntries };
 
         return new UserPreferences(
             Name: user.Name,
             Language: user.Language,
             Tone: user.Tone,
             CustomInstructions: user.CustomInstructions,
-            Memories: entries);
+            Memories: entries,
+            TodaySchedules: todayEntries);
     }
 }

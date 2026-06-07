@@ -29,6 +29,7 @@ public static class ObsidianRouter
 
         // POST /api/obsidian/sync — 기존 노트 전체 vault 동기화
         app.MapPost("/api/obsidian/sync", async (
+            HttpRequest request,
             IObsidianService obsidianService,
             INoteRepository noteRepository,
             CancellationToken ct) =>
@@ -36,7 +37,7 @@ public static class ObsidianRouter
             if (!obsidianService.IsEnabled)
                 return Results.BadRequest(ApiResponse.FailResult("OBSIDIAN_DISABLED", "Obsidian vault path not configured or disabled"));
 
-            var notes = await noteRepository.ListByUserAsync(AppConstants.DefaultUserId, 1000, ct);
+            var notes = await noteRepository.ListByUserAsync(request.GetUserId(), 1000, ct);
             await obsidianService.SyncAllNotesAsync(notes, ct);
             return Results.Ok(ApiResponse<SyncResultDto>.Ok(new SyncResultDto(notes.Count)));
         });

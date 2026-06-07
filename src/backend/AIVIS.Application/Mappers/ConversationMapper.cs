@@ -15,6 +15,7 @@ public static class ConversationMapper
     public static SessionResp ToResp(this Session session) => new(
         session.Id.ToString(),
         session.UserId,
+        session.Title,
         session.Status,
         session.Messages.OrderBy(m => m.CreatedAt).Select(m => m.ToResp()).ToList(),
         session.CreatedAt

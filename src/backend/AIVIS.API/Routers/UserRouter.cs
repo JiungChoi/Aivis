@@ -67,10 +67,11 @@ public static class UserRouter
             if (user is null)
                 return Results.NotFound(ApiResponse.FailResult("NOT_FOUND", "User not found"));
 
-            if (request.Name is not null)  user.Name  = request.Name;
-            if (request.Email is not null) user.Email = request.Email;
-            if (request.Gender is not null) user.Gender = request.Gender;
-            if (request.Tone is not null)  user.Tone  = request.Tone;
+            if (request.Name is not null)     user.Name     = request.Name;
+            if (request.Email is not null)    user.Email    = request.Email;
+            if (request.Gender is not null)   user.Gender   = request.Gender;
+            if (request.Tone is not null)     user.Tone     = request.Tone;
+            if (request.Language is not null) user.Language = request.Language;
             user.UpdatedAt = DateTime.UtcNow;
 
             await userRepository.UpdateAsync(user, ct);
@@ -107,4 +108,4 @@ public static class UserRouter
 }
 
 public record InitUserRequest(string? Name, string? Gender, string? Phone, string? Email);
-public record UpdateUserRequest(string? Name, string? Gender, string? Email, string? Tone);
+public record UpdateUserRequest(string? Name, string? Gender, string? Email, string? Tone, string? Language);

@@ -12,6 +12,7 @@ public record MessageResp(
 public record SessionResp(
     string Id,
     string UserId,
+    string Title,
     SessionStatus Status,
     IReadOnlyList<MessageResp> Messages,
     DateTime CreatedAt

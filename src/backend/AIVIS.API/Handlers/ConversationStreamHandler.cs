@@ -28,6 +28,8 @@ public static class ConversationStreamHandler
             return;
         }
 
+        var isFirstMessage = !session.Messages.Any();
+
         var userMessage = await messageRepository.CreateAsync(new Message
         {
             Id        = Guid.NewGuid(),
@@ -36,6 +38,13 @@ public static class ConversationStreamHandler
             Content   = body.Content,
             CreatedAt = DateTime.UtcNow,
         }, ct);
+
+        // Auto-title session from the first user message
+        if (isFirstMessage)
+        {
+            var raw = body.Content.Trim().Replace('\n', ' ');
+            session.Title = raw.Length > 40 ? raw[..40] : raw;
+        }
 
         var dbHistory = session.Messages.Append(userMessage).ToList();
         var chatHistory = await qualityController.PrepareHistoryAsync(session.UserId, dbHistory, ct);

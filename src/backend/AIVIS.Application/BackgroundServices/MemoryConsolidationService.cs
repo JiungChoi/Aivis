@@ -1,3 +1,4 @@
+using AIVIS.Application.Constants;
 using AIVIS.Domain.Repositories;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -28,7 +29,7 @@ public class MemoryConsolidationService(
 
     private async Task ConsolidateAsync(CancellationToken ct)
     {
-        var memories = await memoryRepository.ListByUserAsync("local", ct);
+        var memories = await memoryRepository.ListByUserAsync(ApplicationConstants.DefaultUserId, ct);
         logger.LogInformation("Memory consolidation: {Count} entries reviewed", memories.Count);
         // 장기 기억 정리 — 추후 LLM 기반 요약 병합 추가 예정
     }

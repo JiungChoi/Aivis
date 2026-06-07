@@ -27,4 +27,4 @@ public record LlmNonStreamResponse(
     public bool HasToolCalls => ToolCalls.Count > 0;
 }
 
-public record LlmToolCallResult(string Name, JsonElement RawArguments);
+public record LlmToolCallResult(string Id, string Name, JsonElement RawArguments);
