@@ -10,6 +10,8 @@ src/backend/**/obj/
 src/backend/**/*.user
 src/backend/**/*.suo
 src/backend/.env
+src/backend/**/.env
+src/backend/AIVIS.Infrastructure/Environments/**/.env
 src/backend/appsettings.Local.json
 
 # Database
