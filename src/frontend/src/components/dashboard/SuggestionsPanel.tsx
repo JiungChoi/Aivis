@@ -13,21 +13,18 @@ interface Props {
   error: boolean;
   onRetry: () => void;
   onSelect: (title: string) => void;
-  onAddToSchedule: (title: string) => Promise<void>;
+  onAddToSchedule: (title: string, index: number) => Promise<void>;
 }
 
 export function SuggestionsPanel({ suggestions, loading, error, onRetry, onSelect, onAddToSchedule }: Props) {
-  const [addedIds, setAddedIds] = useState<Set<number>>(new Set());
   const [addingId, setAddingId] = useState<number | null>(null);
 
   async function handleAddToSchedule(e: React.MouseEvent, title: string, idx: number) {
     e.stopPropagation();
-    if (addingId !== null || addedIds.has(idx)) return;
+    if (addingId !== null) return;
     setAddingId(idx);
     try {
-      await onAddToSchedule(title);
-      setAddedIds(prev => new Set([...prev, idx]));
-      setTimeout(() => setAddedIds(prev => { const n = new Set(prev); n.delete(idx); return n; }), 3000);
+      await onAddToSchedule(title, idx);
     } catch { /* no-op */ }
     finally { setAddingId(null); }
   }
@@ -90,20 +87,25 @@ export function SuggestionsPanel({ suggestions, loading, error, onRetry, onSelec
 
                 <button
                   onClick={(e) => handleAddToSchedule(e, s.title, i)}
-                  title="오늘 일정에 추가"
+                  title="오늘 일정에 추가 (드래그도 가능)"
+                  draggable
+                  onDragStart={(e) => {
+                    e.dataTransfer.setData('application/aivis-suggestion', JSON.stringify({ title: s.title, index: i }));
+                    e.dataTransfer.effectAllowed = 'copy';
+                  }}
                   className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
                   style={{
-                    background: addedIds.has(i) ? 'rgba(16,185,129,0.15)' : 'rgba(10,132,255,0.12)',
-                    border: `1px solid ${addedIds.has(i) ? 'rgba(16,185,129,0.35)' : 'rgba(10,132,255,0.3)'}`,
+                    background: 'rgba(10,132,255,0.12)',
+                    border: '1px solid rgba(10,132,255,0.3)',
                     borderRadius: 5,
                     padding: '2px 7px',
                     fontSize: 9,
-                    color: addedIds.has(i) ? '#6ee7b7' : '#64b5ff',
-                    cursor: 'pointer',
+                    color: '#64b5ff',
+                    cursor: addingId === i ? 'default' : 'grab',
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  {addedIds.has(i) ? '추가됨' : addingId === i ? '...' : '+ 일정'}
+                  {addingId === i ? '...' : '+ 일정'}
                 </button>
               </div>
             );

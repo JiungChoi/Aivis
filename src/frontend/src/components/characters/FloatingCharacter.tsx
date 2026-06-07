@@ -11,21 +11,14 @@ interface PoseProps {
   uid: string; // for gradient ID namespacing
 }
 
-function MaleChar({ primary, hair, skin, state, walkFrame, uid }: PoseProps) {
-  // Spirit orb — no face, glowing energy form
-  let lArmY = 0, rArmY = 0, lLegY = 0, rLegY = 0, lLegX = 0, rLegX = 0;
-
-  if (state === 'walking') {
-    if (walkFrame === 0) { lLegY = 6; lLegX = -3; rLegY = -6; rLegX = 3; lArmY = 5; rArmY = -5; }
-    else                 { lLegY = -6; lLegX = 3; rLegY = 6; rLegX = -3; lArmY = -5; rArmY = 5; }
-  } else if (state === 'waving')   { rArmY = -26; }
-  else if (state === 'thinking')   { rArmY = -14; }
-
+function MaleChar({ primary, hair, skin, state, uid }: PoseProps) {
+  // Head-only floating orb — no body/arms/legs. State drives subtle accents only.
   const s = `${uid}-m`;
   const core = skin;
+  const active = state === 'waving' || state === 'talking';
 
   return (
-    <svg viewBox="0 0 72 112" width="72" height="112" style={{ overflow: 'visible' }}>
+    <svg viewBox="0 0 72 72" width="72" height="72" style={{ overflow: 'visible' }}>
       <defs>
         <radialGradient id={`${s}-orb`} cx="38%" cy="32%" r="65%">
           <stop offset="0%"   stopColor={core}    stopOpacity="0.95" />
@@ -37,109 +30,50 @@ function MaleChar({ primary, hair, skin, state, walkFrame, uid }: PoseProps) {
           <stop offset="0%"   stopColor={primary} stopOpacity="0.24" />
           <stop offset="100%" stopColor={primary} stopOpacity="0" />
         </radialGradient>
-        <linearGradient id={`${s}-body`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stopColor={primary} stopOpacity="0.52" />
-          <stop offset="60%"  stopColor={primary} stopOpacity="0.2" />
-          <stop offset="100%" stopColor={primary} stopOpacity="0" />
-        </linearGradient>
       </defs>
 
       {/* Outer ambient halo */}
-      <circle cx="36" cy="26" r="42" fill={`url(#${s}-halo)`} />
+      <circle cx="36" cy="36" r="34" fill={`url(#${s}-halo)`} />
 
-      {/* Left arm tendril */}
-      <g transform={`translate(0, ${lArmY})`} style={{ transition: 'transform 0.18s ease' }}>
-        <path d="M20 58 Q10 70 8 86 L8 100" stroke={primary} strokeWidth="8" fill="none" strokeLinecap="round" strokeOpacity="0.45" />
-        <circle cx="8" cy="102" r="5"   fill={primary} fillOpacity="0.18" />
-        <circle cx="8" cy="102" r="2.5" fill={primary} fillOpacity="0.55" />
-        <circle cx="8" cy="102" r="1"   fill={core}    fillOpacity="0.85" />
-      </g>
-
-      {/* Right arm tendril */}
-      <g transform={`translate(0, ${rArmY})`} style={{ transition: 'transform 0.18s ease' }}>
-        <path d="M52 58 Q62 70 64 86 L64 100" stroke={primary} strokeWidth="8" fill="none" strokeLinecap="round" strokeOpacity="0.45" />
-        <circle cx="64" cy="102" r="5"   fill={primary} fillOpacity="0.18" />
-        <circle cx="64" cy="102" r="2.5" fill={primary} fillOpacity="0.55" />
-        <circle cx="64" cy="102" r="1"   fill={core}    fillOpacity="0.85" />
-        {state === 'waving' && <>
-          <circle cx="64" cy="7" r="7"   fill={primary} fillOpacity="0.18" />
-          <circle cx="64" cy="7" r="4"   fill={primary} fillOpacity="0.5" />
-          <circle cx="64" cy="7" r="1.8" fill={core}    fillOpacity="0.9" />
-        </>}
-        {state === 'thinking' && <>
-          <circle cx="38" cy="2" r="5"   fill={primary} fillOpacity="0.22" />
-          <circle cx="38" cy="2" r="2.5" fill={primary} fillOpacity="0.5" />
-          <circle cx="38" cy="2" r="1"   fill={core}    fillOpacity="0.8" />
-        </>}
-      </g>
-
-      {/* Left leg wisp */}
-      <g transform={`translate(${lLegX}, ${lLegY})`} style={{ transition: 'transform 0.18s ease' }}>
-        <path d="M28 102 Q22 114 20 126" stroke={primary} strokeWidth="9" fill="none" strokeLinecap="round" strokeOpacity="0.38" />
-        <circle cx="20" cy="128" r="4"   fill={primary} fillOpacity="0.18" />
-        <circle cx="20" cy="128" r="1.8" fill={primary} fillOpacity="0.45" />
-      </g>
-
-      {/* Right leg wisp */}
-      <g transform={`translate(${rLegX}, ${rLegY})`} style={{ transition: 'transform 0.18s ease' }}>
-        <path d="M44 102 Q50 114 52 126" stroke={primary} strokeWidth="9" fill="none" strokeLinecap="round" strokeOpacity="0.38" />
-        <circle cx="52" cy="128" r="4"   fill={primary} fillOpacity="0.18" />
-        <circle cx="52" cy="128" r="1.8" fill={primary} fillOpacity="0.45" />
-      </g>
-
-      {/* Body — spirit torso (wider/blocky = male) */}
-      <path d="M16 56 Q22 50 36 48 Q50 50 56 56 L56 104 Q48 108 36 108 Q24 108 16 104 Z" fill={`url(#${s}-body)`} />
-      <ellipse cx="36" cy="76" rx="7" ry="11" fill={core} fillOpacity="0.05" />
-
-      {/* Neck glow connector */}
-      <rect x="33" y="47" width="6" height="5" rx="3" fill={primary} fillOpacity="0.5" />
-
-      {/* Orb head */}
-      <circle cx="36" cy="26" r="26" fill={primary} fillOpacity="0.06" />
-      <circle cx="36" cy="26" r="20" fill={`url(#${s}-orb)`} />
-      <circle cx="36" cy="26" r="20" fill="none" stroke={primary} strokeWidth="1.2" strokeOpacity="0.55" />
-      <circle cx="36" cy="26" r="13" fill={primary} fillOpacity="0.2" />
-      <circle cx="36" cy="26" r="8"  fill={core}    fillOpacity="0.28" />
-      <circle cx="36" cy="26" r="4"  fill={core}    fillOpacity="0.58" />
-      <circle cx="36" cy="26" r="1.8" fill={core}   fillOpacity="0.95" />
-      <ellipse cx="28" cy="18" rx="5.5" ry="3.5" fill={core} fillOpacity="0.42" transform="rotate(-25,28,18)" />
+      {/* Orb head (larger, square male framing ring) */}
+      <circle cx="36" cy="36" r="30" fill={primary} fillOpacity="0.05" />
+      <circle cx="36" cy="36" r="23" fill={`url(#${s}-orb)`} />
+      <circle cx="36" cy="36" r="23" fill="none" stroke={primary} strokeWidth="1.4" strokeOpacity={active ? 0.8 : 0.55} />
+      <circle cx="36" cy="36" r="15" fill={primary} fillOpacity="0.2" />
+      <circle cx="36" cy="36" r="9"  fill={core}    fillOpacity="0.28" />
+      <circle cx="36" cy="36" r="4.5" fill={core}   fillOpacity="0.6" />
+      <circle cx="36" cy="36" r="2"   fill={core}   fillOpacity="0.95" />
+      <ellipse cx="27" cy="27" rx="6" ry="4" fill={core} fillOpacity="0.42" transform="rotate(-25,27,27)" />
 
       {/* Floating particles */}
-      <circle cx="12" cy="12" r="1.8" fill={hair} fillOpacity="0.65">
-        <animate attributeName="cy" values="12;6;12" dur="2.4s" repeatCount="indefinite" />
+      <circle cx="10" cy="14" r="1.8" fill={hair} fillOpacity="0.65">
+        <animate attributeName="cy" values="14;8;14" dur="2.4s" repeatCount="indefinite" />
         <animate attributeName="opacity" values="0.65;0.1;0.65" dur="2.4s" repeatCount="indefinite" />
       </circle>
-      <circle cx="60" cy="16" r="1.4" fill={primary} fillOpacity="0.6">
-        <animate attributeName="cy" values="16;9;16" dur="2.0s" repeatCount="indefinite" begin="0.6s" />
+      <circle cx="62" cy="18" r="1.4" fill={primary} fillOpacity="0.6">
+        <animate attributeName="cy" values="18;11;18" dur="2.0s" repeatCount="indefinite" begin="0.6s" />
         <animate attributeName="opacity" values="0.6;0.1;0.6" dur="2.0s" repeatCount="indefinite" begin="0.6s" />
       </circle>
-      <circle cx="8" cy="30" r="1.2" fill={hair} fillOpacity="0.5">
+      <circle cx="8" cy="44" r="1.2" fill={hair} fillOpacity="0.5">
         <animate attributeName="cx" values="8;3;8" dur="2.8s" repeatCount="indefinite" begin="1.2s" />
         <animate attributeName="opacity" values="0.5;0.08;0.5" dur="2.8s" repeatCount="indefinite" begin="1.2s" />
       </circle>
-      <circle cx="64" cy="36" r="1.5" fill={primary} fillOpacity="0.55">
-        <animate attributeName="cy" values="36;29;36" dur="2.2s" repeatCount="indefinite" begin="0.4s" />
+      <circle cx="64" cy="48" r="1.5" fill={primary} fillOpacity="0.55">
+        <animate attributeName="cy" values="48;41;48" dur="2.2s" repeatCount="indefinite" begin="0.4s" />
         <animate attributeName="opacity" values="0.55;0.1;0.55" dur="2.2s" repeatCount="indefinite" begin="0.4s" />
       </circle>
     </svg>
   );
 }
 
-function FemaleChar({ primary, hair, skin, state, walkFrame, uid }: PoseProps) {
-  // Spirit orb — feminine form (narrower torso, flared base)
-  let lArmY = 0, rArmY = 0, lLegY = 0, rLegY = 0, lLegX = 0, rLegX = 0;
-
-  if (state === 'walking') {
-    if (walkFrame === 0) { lLegY = 6; lLegX = -3; rLegY = -6; rLegX = 3; lArmY = 3.5; rArmY = -3.5; }
-    else                 { lLegY = -6; lLegX = 3; rLegY = 6; rLegX = -3; lArmY = -3.5; rArmY = 3.5; }
-  } else if (state === 'waving')   { rArmY = -24; }
-  else if (state === 'thinking')   { rArmY = -14; }
-
+function FemaleChar({ primary, hair, skin, state, uid }: PoseProps) {
+  // Head-only floating orb — feminine accent (softer, extra particle). No body.
   const s = `${uid}-f`;
   const core = skin;
+  const active = state === 'waving' || state === 'talking';
 
   return (
-    <svg viewBox="0 0 72 112" width="72" height="112" style={{ overflow: 'visible' }}>
+    <svg viewBox="0 0 72 72" width="72" height="72" style={{ overflow: 'visible' }}>
       <defs>
         <radialGradient id={`${s}-orb`} cx="38%" cy="32%" r="65%">
           <stop offset="0%"   stopColor={core}    stopOpacity="0.95" />
@@ -151,92 +85,40 @@ function FemaleChar({ primary, hair, skin, state, walkFrame, uid }: PoseProps) {
           <stop offset="0%"   stopColor={primary} stopOpacity="0.24" />
           <stop offset="100%" stopColor={primary} stopOpacity="0" />
         </radialGradient>
-        <linearGradient id={`${s}-body`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stopColor={primary} stopOpacity="0.5" />
-          <stop offset="55%"  stopColor={primary} stopOpacity="0.18" />
-          <stop offset="100%" stopColor={primary} stopOpacity="0" />
-        </linearGradient>
       </defs>
 
       {/* Outer ambient halo */}
-      <circle cx="36" cy="26" r="42" fill={`url(#${s}-halo)`} />
+      <circle cx="36" cy="36" r="34" fill={`url(#${s}-halo)`} />
 
-      {/* Left arm tendril */}
-      <g transform={`translate(0, ${lArmY})`} style={{ transition: 'transform 0.18s ease' }}>
-        <path d="M22 56 Q12 68 9 83 L9 97" stroke={primary} strokeWidth="7" fill="none" strokeLinecap="round" strokeOpacity="0.42" />
-        <circle cx="9"  cy="99" r="4.5" fill={primary} fillOpacity="0.18" />
-        <circle cx="9"  cy="99" r="2.2" fill={primary} fillOpacity="0.55" />
-        <circle cx="9"  cy="99" r="0.9" fill={core}    fillOpacity="0.85" />
-      </g>
+      {/* Orb head (slightly smaller + thinner ring = feminine) */}
+      <circle cx="36" cy="36" r="29" fill={primary} fillOpacity="0.05" />
+      <circle cx="36" cy="36" r="21" fill={`url(#${s}-orb)`} />
+      <circle cx="36" cy="36" r="21" fill="none" stroke={primary} strokeWidth="1" strokeOpacity={active ? 0.78 : 0.55} />
+      <circle cx="36" cy="36" r="14" fill={primary} fillOpacity="0.2" />
+      <circle cx="36" cy="36" r="8.5" fill={core}   fillOpacity="0.28" />
+      <circle cx="36" cy="36" r="4.2" fill={core}   fillOpacity="0.6" />
+      <circle cx="36" cy="36" r="1.9" fill={core}   fillOpacity="0.95" />
+      <ellipse cx="28" cy="28" rx="5.5" ry="3.6" fill={core} fillOpacity="0.42" transform="rotate(-25,28,28)" />
 
-      {/* Right arm tendril */}
-      <g transform={`translate(0, ${rArmY})`} style={{ transition: 'transform 0.18s ease' }}>
-        <path d="M50 56 Q60 68 63 83 L63 97" stroke={primary} strokeWidth="7" fill="none" strokeLinecap="round" strokeOpacity="0.42" />
-        <circle cx="63" cy="99" r="4.5" fill={primary} fillOpacity="0.18" />
-        <circle cx="63" cy="99" r="2.2" fill={primary} fillOpacity="0.55" />
-        <circle cx="63" cy="99" r="0.9" fill={core}    fillOpacity="0.85" />
-        {state === 'waving' && <>
-          <circle cx="63" cy="7" r="7"   fill={primary} fillOpacity="0.18" />
-          <circle cx="63" cy="7" r="4"   fill={primary} fillOpacity="0.5" />
-          <circle cx="63" cy="7" r="1.8" fill={core}    fillOpacity="0.9" />
-        </>}
-        {state === 'thinking' && <>
-          <circle cx="38" cy="2" r="5"   fill={primary} fillOpacity="0.22" />
-          <circle cx="38" cy="2" r="2.5" fill={primary} fillOpacity="0.5" />
-          <circle cx="38" cy="2" r="1"   fill={core}    fillOpacity="0.8" />
-        </>}
-      </g>
-
-      {/* Left leg wisp — wider flare (robe effect) */}
-      <g transform={`translate(${lLegX}, ${lLegY})`} style={{ transition: 'transform 0.18s ease' }}>
-        <path d="M29 102 Q20 116 16 128" stroke={primary} strokeWidth="9" fill="none" strokeLinecap="round" strokeOpacity="0.32" />
-        <circle cx="16" cy="130" r="4"   fill={primary} fillOpacity="0.16" />
-        <circle cx="16" cy="130" r="1.8" fill={primary} fillOpacity="0.38" />
-      </g>
-
-      {/* Right leg wisp */}
-      <g transform={`translate(${rLegX}, ${rLegY})`} style={{ transition: 'transform 0.18s ease' }}>
-        <path d="M43 102 Q52 116 56 128" stroke={primary} strokeWidth="9" fill="none" strokeLinecap="round" strokeOpacity="0.32" />
-        <circle cx="56" cy="130" r="4"   fill={primary} fillOpacity="0.16" />
-        <circle cx="56" cy="130" r="1.8" fill={primary} fillOpacity="0.38" />
-      </g>
-
-      {/* Body — spirit form (narrower top, flared base = feminine robe) */}
-      <path d="M20 54 Q25 48 36 46 Q47 48 52 54 L60 104 Q50 110 36 110 Q22 110 12 104 Z" fill={`url(#${s}-body)`} />
-      <ellipse cx="36" cy="78" rx="6" ry="13" fill={core} fillOpacity="0.06" />
-
-      {/* Neck glow connector */}
-      <rect x="33" y="45" width="6" height="5" rx="3" fill={primary} fillOpacity="0.5" />
-
-      {/* Orb head */}
-      <circle cx="36" cy="26" r="26" fill={primary} fillOpacity="0.06" />
-      <circle cx="36" cy="26" r="20" fill={`url(#${s}-orb)`} />
-      <circle cx="36" cy="26" r="20" fill="none" stroke={primary} strokeWidth="1.2" strokeOpacity="0.55" />
-      <circle cx="36" cy="26" r="13" fill={primary} fillOpacity="0.2" />
-      <circle cx="36" cy="26" r="8"  fill={core}    fillOpacity="0.28" />
-      <circle cx="36" cy="26" r="4"  fill={core}    fillOpacity="0.58" />
-      <circle cx="36" cy="26" r="1.8" fill={core}   fillOpacity="0.95" />
-      <ellipse cx="28" cy="18" rx="5.5" ry="3.5" fill={core} fillOpacity="0.42" transform="rotate(-25,28,18)" />
-
-      {/* Floating particles (5 for female — slightly more ethereal) */}
-      <circle cx="13" cy="10" r="1.6" fill={primary} fillOpacity="0.65">
-        <animate attributeName="cy" values="10;4;10" dur="2.6s" repeatCount="indefinite" />
+      {/* Floating particles (5 — slightly more ethereal) */}
+      <circle cx="12" cy="12" r="1.6" fill={primary} fillOpacity="0.65">
+        <animate attributeName="cy" values="12;6;12" dur="2.6s" repeatCount="indefinite" />
         <animate attributeName="opacity" values="0.65;0.1;0.65" dur="2.6s" repeatCount="indefinite" />
       </circle>
-      <circle cx="59" cy="14" r="1.3" fill={hair} fillOpacity="0.6">
-        <animate attributeName="cy" values="14;7;14" dur="2.1s" repeatCount="indefinite" begin="0.7s" />
+      <circle cx="60" cy="16" r="1.3" fill={hair} fillOpacity="0.6">
+        <animate attributeName="cy" values="16;9;16" dur="2.1s" repeatCount="indefinite" begin="0.7s" />
         <animate attributeName="opacity" values="0.6;0.1;0.6" dur="2.1s" repeatCount="indefinite" begin="0.7s" />
       </circle>
-      <circle cx="8" cy="32" r="1.1" fill={hair} fillOpacity="0.5">
+      <circle cx="8" cy="42" r="1.1" fill={hair} fillOpacity="0.5">
         <animate attributeName="cx" values="8;3;8" dur="3.0s" repeatCount="indefinite" begin="1.4s" />
         <animate attributeName="opacity" values="0.5;0.06;0.5" dur="3.0s" repeatCount="indefinite" begin="1.4s" />
       </circle>
-      <circle cx="64" cy="36" r="1.4" fill={primary} fillOpacity="0.5">
-        <animate attributeName="cy" values="36;29;36" dur="2.3s" repeatCount="indefinite" begin="0.5s" />
+      <circle cx="64" cy="46" r="1.4" fill={primary} fillOpacity="0.5">
+        <animate attributeName="cy" values="46;39;46" dur="2.3s" repeatCount="indefinite" begin="0.5s" />
         <animate attributeName="opacity" values="0.5;0.08;0.5" dur="2.3s" repeatCount="indefinite" begin="0.5s" />
       </circle>
-      <circle cx="36" cy="2" r="1.2" fill={primary} fillOpacity="0.55">
-        <animate attributeName="cy" values="2;-4;2" dur="1.9s" repeatCount="indefinite" begin="0.9s" />
+      <circle cx="36" cy="6" r="1.2" fill={primary} fillOpacity="0.55">
+        <animate attributeName="cy" values="6;0;6" dur="1.9s" repeatCount="indefinite" begin="0.9s" />
         <animate attributeName="opacity" values="0.55;0.08;0.55" dur="1.9s" repeatCount="indefinite" begin="0.9s" />
       </circle>
     </svg>

@@ -253,16 +253,49 @@ export default function TodoPage() {
         {loading ? (
           <div className="text-gray-600 text-[12px] text-center py-16">불러오는 중...</div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center mx-auto mb-3">
+          todos.length === 0 && filter === 'all' ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '48px 24px', gap: 14, textAlign: 'center' }}>
+              <div style={{
+                width: 56, height: 56, borderRadius: 18,
+                background: 'rgba(10,132,255,0.06)',
+                border: '1px solid rgba(96,165,250,0.12)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <svg style={{ width: 26, height: 26, color: '#3b82f6' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </div>
+              <div>
+                <div style={{ color: 'rgba(235,235,245,0.7)', fontSize: 14, fontWeight: 500 }}>할 일이 없어요</div>
+                <div style={{ color: 'rgba(235,235,245,0.25)', fontSize: 11, marginTop: 5, lineHeight: 1.6 }}>
+                  오늘 해야 할 일을 추가하거나<br />AI에게 작업 계획을 요청해보세요
+                </div>
+              </div>
+              <button
+                onClick={() => setShowForm(true)}
+                style={{
+                  padding: '8px 20px', borderRadius: 12, fontSize: 12, fontWeight: 600,
+                  background: '#0a84ff', border: 'none', color: 'white',
+                  cursor: 'pointer', transition: 'background 0.15s ease',
+                  boxShadow: '0 4px 16px rgba(10,132,255,0.3)',
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#0070d9'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '#0a84ff'; }}
+              >+ 첫 번째 할 일 추가</button>
+            </div>
+          ) : (
+            <div className="text-center py-16">
+              <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center mx-auto mb-3">
                 <svg style={{ width: 16, height: 16, color: 'rgba(235,235,245,0.2)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-            <div className="text-gray-500 text-[13px]">
-              {filter === 'done' ? '완료된 항목이 없어요' : filter === 'active' ? '모두 완료했어요!' : '할 일을 추가해보세요'}
+              <div className="text-gray-500 text-[13px]">
+                {filter === 'done' ? '완료된 항목이 없어요' : '모두 완료했어요! 🎉'}
+              </div>
             </div>
-          </div>
+          )
         ) : (
           <div className="space-y-2">
             {filtered.map(todo => (

@@ -23,6 +23,8 @@ function WireframeGlobe({ w, h, isRecording, isSpeaking }: {
     let rotY = 0;
     let rafId: number;
     let t = 0;
+    let hudRot = 0;   // outer HUD ring rotation (clockwise)
+    let hudRot2 = 0;  // counter-rotating bracket ring
 
     // Floating orbit particles
     const orbits = Array.from({ length: 6 }, (_, i) => ({
@@ -79,6 +81,8 @@ function WireframeGlobe({ w, h, isRecording, isSpeaking }: {
       ctx.clearRect(0, 0, w, h);
       t += 0.005;
       rotY += isSpeaking ? 0.006 : 0.003;
+      hudRot += isSpeaking ? 0.012 : 0.006;
+      hudRot2 -= isSpeaking ? 0.009 : 0.004;
 
       const pulse = 1 + (isRecording ? 0.04 : 0.018) * Math.sin(t * (isRecording ? 3.5 : 1.8));
       const r = BASE_R * pulse;
@@ -154,13 +158,116 @@ function WireframeGlobe({ w, h, isRecording, isSpeaking }: {
         ctx.fill();
       }
 
-      // Core glow
-      const cg = ctx.createRadialGradient(cx, cy, 0, cx, cy, r * 0.38);
-      cg.addColorStop(0, `rgba(${gc[0]},${gc[1]},${gc[2]},0.22)`);
-      cg.addColorStop(0.55, `rgba(${mc[0]},${mc[1]},${mc[2]},0.10)`);
+      // ── J.A.R.V.I.S. HUD overlay (screen-space, concentric holo rings) ──
+      const strokeMC = (a: number) => `rgba(${mc[0]},${mc[1]},${mc[2]},${a.toFixed(3)})`;
+      const strokeGC = (a: number) => `rgba(${gc[0]},${gc[1]},${gc[2]},${a.toFixed(3)})`;
+      // Largest radius that still fits inside the canvas (keeps HUD from clipping)
+      const lim = Math.min(cx, cy) - 4;
+
+      // Outer segmented ring — rotating clockwise, dashed arc blocks
+      const ringR = Math.max(r * 1.12, lim * 0.74);
+      const segCount = 16;
+      for (let i = 0; i < segCount; i++) {
+        const a0 = hudRot + (i / segCount) * Math.PI * 2;
+        const a1 = a0 + (Math.PI * 2 / segCount) * 0.62; // gap between segments
+        ctx.beginPath();
+        ctx.arc(cx, cy, ringR, a0, a1);
+        ctx.strokeStyle = strokeMC(i % 4 === 0 ? 0.55 : 0.22);
+        ctx.lineWidth = i % 4 === 0 ? 2 : 1;
+        ctx.stroke();
+      }
+
+      // Tick-mark ring — fixed radial graduations
+      const tickR = lim * 0.84;
+      for (let i = 0; i < 60; i++) {
+        const a = (i / 60) * Math.PI * 2;
+        const major = i % 5 === 0;
+        const len = major ? 7 : 3;
+        const ca = Math.cos(a), sa = Math.sin(a);
+        ctx.beginPath();
+        ctx.moveTo(cx + ca * tickR, cy + sa * tickR);
+        ctx.lineTo(cx + ca * (tickR + len), cy + sa * (tickR + len));
+        ctx.strokeStyle = strokeMC(major ? 0.4 : 0.16);
+        ctx.lineWidth = major ? 1.4 : 0.8;
+        ctx.stroke();
+      }
+
+      // Counter-rotating quarter-arc brackets
+      const brR = lim * 0.93;
+      for (let i = 0; i < 4; i++) {
+        const a0 = hudRot2 + i * (Math.PI / 2) + 0.18;
+        const a1 = a0 + Math.PI / 2 - 0.36;
+        ctx.beginPath();
+        ctx.arc(cx, cy, brR, a0, a1);
+        ctx.strokeStyle = strokeGC(0.45);
+        ctx.lineWidth = 1.4;
+        ctx.stroke();
+        // end caps
+        [a0, a1].forEach(ea => {
+          const ca = Math.cos(ea), sa = Math.sin(ea);
+          ctx.beginPath();
+          ctx.moveTo(cx + ca * (brR - 4), cy + sa * (brR - 4));
+          ctx.lineTo(cx + ca * (brR + 4), cy + sa * (brR + 4));
+          ctx.strokeStyle = strokeGC(0.5);
+          ctx.lineWidth = 1.2;
+          ctx.stroke();
+        });
+      }
+
+      // Thin inner halo ring
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 1.06, 0, Math.PI * 2);
+      ctx.strokeStyle = strokeMC(0.18);
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+
+      // Corner reticle brackets (HUD frame)
+      const frame = lim * 0.99;
+      const corner = lim * 0.30;
+      ctx.strokeStyle = strokeGC(0.3);
+      ctx.lineWidth = 1.2;
+      ([[-1, -1], [1, -1], [-1, 1], [1, 1]] as const).forEach(([sx, sy]) => {
+        const px = cx + sx * frame, py = cy + sy * frame;
+        ctx.beginPath();
+        ctx.moveTo(px - sx * corner, py);
+        ctx.lineTo(px, py);
+        ctx.lineTo(px, py - sy * corner);
+        ctx.stroke();
+      });
+
+      // ── Arc-reactor core ──
+      const reactorPulse = 0.7 + 0.3 * Math.sin(t * (isRecording ? 5 : 2.4));
+      // segmented reactor ring (triangular wedges)
+      const reactorR = r * 0.26;
+      const wedges = 8;
+      for (let i = 0; i < wedges; i++) {
+        const a0 = -hudRot * 1.5 + (i / wedges) * Math.PI * 2;
+        const a1 = a0 + (Math.PI * 2 / wedges) * 0.7;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, reactorR, a0, a1);
+        ctx.closePath();
+        ctx.fillStyle = strokeGC(0.10 * reactorPulse);
+        ctx.fill();
+      }
+      ctx.beginPath();
+      ctx.arc(cx, cy, reactorR, 0, Math.PI * 2);
+      ctx.strokeStyle = strokeGC(0.55 * reactorPulse);
+      ctx.lineWidth = 1.4;
+      ctx.stroke();
+
+      // Core glow (bright reactor center)
+      const cg = ctx.createRadialGradient(cx, cy, 0, cx, cy, r * 0.42);
+      cg.addColorStop(0, strokeGC(0.55 * reactorPulse));
+      cg.addColorStop(0.3, strokeGC(0.22 * reactorPulse));
+      cg.addColorStop(0.6, strokeMC(0.10));
       cg.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.beginPath(); ctx.arc(cx, cy, r * 0.38, 0, Math.PI * 2);
+      ctx.beginPath(); ctx.arc(cx, cy, r * 0.42, 0, Math.PI * 2);
       ctx.fillStyle = cg; ctx.fill();
+      // hot center dot
+      ctx.beginPath(); ctx.arc(cx, cy, r * 0.05 * reactorPulse + 1.5, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${(0.7 * reactorPulse).toFixed(3)})`;
+      ctx.fill();
 
       rafId = requestAnimationFrame(draw);
     }

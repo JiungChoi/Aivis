@@ -10,6 +10,7 @@ export interface Message {
 export interface Session {
   id: string;
   userId: string;
+  title: string;
   status: string;
   messages: Message[];
   createdAt: string;

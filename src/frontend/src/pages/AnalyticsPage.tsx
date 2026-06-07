@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { knowledgeService, type KnowledgeBranch, type KnowledgeNode } from '../services/knowledgeService';
+import { useConversationStore } from '../stores/conversationStore';
 
 // ── Math helpers ──────────────────────────────────────────────────────────────
 
@@ -13,15 +14,22 @@ function polarToXY(angleDeg: number, radius: number): { x: number; y: number } {
   return { x: Math.cos(rad) * radius, y: Math.sin(rad) * radius };
 }
 
-// Curved bezier path that arcs slightly outward from center
+// Smooth cubic Bezier with perpendicular bulge — organic mind-map feel
 function curvePath(x1: number, y1: number, x2: number, y2: number): string {
-  // Control point: midpoint pushed toward the midpoint between (x1,y1) and (x2,y2)
-  const mx = (x1 + x2) / 2;
-  const my = (y1 + y2) / 2;
-  // Push control point slightly away from the midpoint center (0,0 relative to svg center)
-  const cx = mx * 1.05;
-  const cy = my * 1.05;
-  return `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`;
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const len = Math.sqrt(dx * dx + dy * dy) || 1;
+  // Perpendicular unit vector (rotate -90°)
+  const perpX = -dy / len;
+  const perpY = dx / len;
+  // Bulge magnitude: 10% of line length
+  const bulge = len * 0.10;
+  // Two control points at 1/3 and 2/3 along the line, offset perpendicular
+  const cp1x = x1 + dx * 0.33 + perpX * bulge;
+  const cp1y = y1 + dy * 0.33 + perpY * bulge;
+  const cp2x = x1 + dx * 0.67 + perpX * bulge;
+  const cp2y = y1 + dy * 0.67 + perpY * bulge;
+  return `M ${x1} ${y1} C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${x2} ${y2}`;
 }
 
 // ── Sub-node spread layout ────────────────────────────────────────────────────
@@ -42,16 +50,19 @@ function computeSubNodePositions(
   const count = branch.nodes.length;
   if (count === 0) return [];
 
-  // Wide enough spread so nodes don't overlap (each needs ~60px clearance at subDistance)
-  const spreadDeg = count <= 1 ? 0 : count <= 2 ? 55 : count <= 3 ? 90 : count <= 4 ? 120 : 150;
+  // Wider spread + alternating radial stagger to prevent label overlap
+  const spreadDeg = count <= 1 ? 0 : count <= 2 ? 65 : count <= 3 ? 105 : count <= 4 ? 135 : 160;
   return branch.nodes.map((node, i) => {
     const frac = count === 1 ? 0 : i / (count - 1) - 0.5;
     const angleDeg = branchAngleDeg + frac * spreadDeg;
+    // Alternate radii: even indices stay near, odd push out 22% — avoids same-arc collisions
+    const stagger = count >= 3 ? (i % 2 === 0 ? 1.0 : 1.22) : 1.0;
+    const r = subDistance * stagger;
     const rad = degToRad(angleDeg);
     return {
       node,
-      x: branchX + Math.cos(rad) * subDistance,
-      y: branchY + Math.sin(rad) * subDistance,
+      x: branchX + Math.cos(rad) * r,
+      y: branchY + Math.sin(rad) * r,
     };
   });
 }
@@ -98,9 +109,11 @@ interface SelectedItem {
 function DetailCard({
   item,
   onClose,
+  onChat,
 }: {
   item: SelectedItem;
   onClose: () => void;
+  onChat: (item: SelectedItem) => void;
 }) {
   const color = item.branch.color;
   const title = item.node ? item.node.label : item.branch.label;
@@ -241,6 +254,43 @@ function DetailCard({
           }}>연결 노드</div>
         </div>
       </div>
+
+      {/* Chat CTA */}
+      <button
+        onClick={() => onChat(item)}
+        style={{
+          marginTop: 12,
+          width: '100%',
+          padding: '8px',
+          borderRadius: 10,
+          fontSize: 11,
+          fontWeight: 600,
+          background: `linear-gradient(135deg, ${color}22, ${color}11)`,
+          border: `1px solid ${color}44`,
+          color,
+          cursor: 'pointer',
+          transition: 'all 0.15s ease',
+          fontFamily: 'system-ui, -apple-system, sans-serif',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 6,
+        }}
+        onMouseEnter={e => {
+          (e.currentTarget as HTMLElement).style.background = `linear-gradient(135deg, ${color}33, ${color}22)`;
+          (e.currentTarget as HTMLElement).style.borderColor = `${color}77`;
+        }}
+        onMouseLeave={e => {
+          (e.currentTarget as HTMLElement).style.background = `linear-gradient(135deg, ${color}22, ${color}11)`;
+          (e.currentTarget as HTMLElement).style.borderColor = `${color}44`;
+        }}
+      >
+        <svg style={{ width: 12, height: 12 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+        이 주제로 대화하기
+      </button>
     </div>
   );
 }
@@ -254,13 +304,9 @@ const ANIMATION_CSS = `
 @keyframes analytics-dash-dim {
   to { stroke-dashoffset: -14; }
 }
-@keyframes analytics-pulse-ring {
-  0%   { r: 62; stroke-opacity: 0.22; }
-  50%  { r: 76; stroke-opacity: 0.06; }
-  100% { r: 62; stroke-opacity: 0.22; }
-}
-@keyframes analytics-spin {
-  to { transform: rotate(360deg); }
+@keyframes star-twinkle {
+  0%, 100% { opacity: var(--star-base, 0.5); }
+  50%       { opacity: calc(var(--star-base, 0.5) * 0.25); }
 }
 `;
 
@@ -272,12 +318,31 @@ export default function AnalyticsPage() {
 
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null);
+
+  const sendMessage = useConversationStore(state => state.sendMessage);
+
+  function handleChatAboutItem(item: SelectedItem) {
+    const topic = item.node
+      ? `${item.branch.label} 분야의 "${item.node.label}"`
+      : `"${item.branch.label}"`;
+    sendMessage(`${topic}에 대해 더 깊이 이야기해줘. 어떻게 발전시킬 수 있을까?`);
+    setSelectedItem(null);
+  }
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 900, h: 640 });
 
   // Load dynamic data (real memories/notes) merged into static graph
   useEffect(() => {
     knowledgeService.getGraphWithDynamicData().then(setGraph).catch(() => {});
+  }, []);
+
+  // Re-load when Settings profile changes (same-tab event)
+  useEffect(() => {
+    function handleProfileUpdate() {
+      knowledgeService.getGraphWithDynamicData().then(setGraph).catch(() => {});
+    }
+    window.addEventListener('aivis:profile-updated', handleProfileUpdate);
+    return () => window.removeEventListener('aivis:profile-updated', handleProfileUpdate);
   }, []);
 
   useEffect(() => {
@@ -291,10 +356,10 @@ export default function AnalyticsPage() {
   const cx = size.w / 2;
   const cy = size.h / 2;
 
-  // Layout constants — scale with the smaller dimension
-  const baseRadius = Math.min(size.w, size.h);
-  const branchDistance = baseRadius * 0.30;
-  const subDistance = baseRadius * 0.54;
+  // Layout constants — keep all nodes within half the smaller dimension
+  const baseRadius = Math.min(size.w, size.h) / 2;
+  const branchDistance = baseRadius * 0.52;
+  const subDistance = branchDistance + baseRadius * 0.38;
 
   // Compute branch and sub-node positions
   const branchPositions = branches.map((branch) => {
@@ -362,85 +427,58 @@ export default function AnalyticsPage() {
             style={{ display: 'block' }}
           >
             <defs>
-              {/* ── Background radial gradient ── */}
-              <radialGradient id="bg-glow" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="rgba(10,132,255,0.04)" />
-                <stop offset="70%" stopColor="rgba(0,0,0,0)" />
+              {/* ── 성운 그라디언트 (Nebula) ── */}
+              <radialGradient id="nebula-purple" cx="20%" cy="25%" r="60%">
+                <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.16" />
+                <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0" />
+              </radialGradient>
+              <radialGradient id="nebula-cyan" cx="75%" cy="18%" r="55%">
+                <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.13" />
+                <stop offset="100%" stopColor="#06b6d4" stopOpacity="0" />
+              </radialGradient>
+              <radialGradient id="nebula-amber" cx="82%" cy="78%" r="50%">
+                <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.11" />
+                <stop offset="100%" stopColor="#f59e0b" stopOpacity="0" />
+              </radialGradient>
+              <radialGradient id="nebula-pink" cx="12%" cy="80%" r="45%">
+                <stop offset="0%" stopColor="#ec4899" stopOpacity="0.11" />
+                <stop offset="100%" stopColor="#ec4899" stopOpacity="0" />
+              </radialGradient>
+              <radialGradient id="nebula-center" cx="50%" cy="50%" r="35%">
+                <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.08" />
+                <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
               </radialGradient>
 
-              {/* ── Center node radial gradient ── */}
-              <radialGradient id="center-radial" cx="35%" cy="30%" r="70%">
-                <stop offset="0%" stopColor="rgba(10,132,255,0.92)" />
-                <stop offset="60%" stopColor="rgba(6,182,212,0.55)" />
-                <stop offset="100%" stopColor="rgba(6,182,212,0.18)" />
-              </radialGradient>
-
-              {/* ── Per-branch linear gradients ── */}
-              {branches.map((b) => (
-                <linearGradient
-                  key={`grad-${b.id}`}
-                  id={`grad-${b.id}`}
-                  x1="0%" y1="0%" x2="100%" y2="100%"
-                >
-                  <stop offset="0%" stopColor={b.color} />
-                  <stop offset="100%" stopColor={b.gradientEnd} />
-                </linearGradient>
-              ))}
-
-              {/* ── Per-branch glow filters (strong) ── */}
-              {branches.map((b) => (
-                <filter
-                  key={`glow-strong-${b.id}`}
-                  id={`glow-strong-${b.id}`}
-                  x="-60%" y="-60%"
-                  width="220%" height="220%"
-                >
-                  <feGaussianBlur stdDeviation="8" result="blur1" />
-                  <feGaussianBlur stdDeviation="3" result="blur2" in="SourceGraphic" />
-                  <feMerge>
-                    <feMergeNode in="blur1" />
-                    <feMergeNode in="blur2" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-              ))}
-
-              {/* ── Per-branch glow filters (soft, for sub-nodes) ── */}
-              {branches.map((b) => (
-                <filter
-                  key={`glow-soft-${b.id}`}
-                  id={`glow-soft-${b.id}`}
-                  x="-50%" y="-50%"
-                  width="200%" height="200%"
-                >
-                  <feGaussianBlur stdDeviation="5" result="blur" />
-                  <feMerge>
-                    <feMergeNode in="blur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-              ))}
-
-              {/* ── Center glow filter ── */}
-              <filter id="glow-center" x="-80%" y="-80%" width="260%" height="260%">
-                <feGaussianBlur stdDeviation="12" result="blur" />
+              {/* ── 노드 공통 glow filter ── */}
+              <filter id="node-glow" x="-70%" y="-70%" width="240%" height="240%">
+                <feGaussianBlur stdDeviation="7" result="blur" />
                 <feMerge>
+                  <feMergeNode in="blur" />
                   <feMergeNode in="blur" />
                   <feMergeNode in="SourceGraphic" />
                 </feMerge>
               </filter>
-
-              {/* ── Dot grid pattern ── */}
-              <pattern id="dot-grid" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse">
-                <circle cx="16" cy="16" r="0.6" fill="rgba(255,255,255,0.035)" />
-              </pattern>
-
-              {/* ── Firefly line glow filters ── */}
+              <filter id="center-glow" x="-80%" y="-80%" width="260%" height="260%">
+                <feGaussianBlur stdDeviation="14" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+              <filter id="glow-center" x="-100%" y="-100%" width="300%" height="300%">
+                <feGaussianBlur stdDeviation="20" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
               <filter id="line-blur" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="3" />
+                <feGaussianBlur stdDeviation="4" />
               </filter>
               <filter id="firefly-glow" x="-100%" y="-100%" width="300%" height="300%">
-                <feGaussianBlur stdDeviation="4" result="blur"/>
+                <feGaussianBlur stdDeviation="5" result="blur"/>
                 <feMerge>
                   <feMergeNode in="blur"/>
                   <feMergeNode in="blur"/>
@@ -449,75 +487,83 @@ export default function AnalyticsPage() {
               </filter>
             </defs>
 
-            {/* ── Background layers ── */}
-            <rect x={0} y={0} width={size.w} height={size.h} fill="#000000" />
-            <rect x={0} y={0} width={size.w} height={size.h} fill="url(#bg-glow)" />
-            <rect x={0} y={0} width={size.w} height={size.h} fill="url(#dot-grid)" />
+            {/* ── 우주 배경 ── */}
+            <rect x={0} y={0} width={size.w} height={size.h} fill="#000005" />
 
-            {/* Faint star field */}
-            {Array.from({ length: 60 }, (_, i) => {
-              const px = (Math.sin(i * 2.39 + 0.5) * 0.5 + 0.5) * size.w;
-              const py = (Math.cos(i * 3.71 + 1.2) * 0.5 + 0.5) * size.h;
+            {/* 성운 블롭 (Nebula blobs) */}
+            <ellipse cx={size.w * 0.18} cy={size.h * 0.22} rx={size.w * 0.38} ry={size.h * 0.32} fill="url(#nebula-purple)" />
+            <ellipse cx={size.w * 0.78} cy={size.h * 0.15} rx={size.w * 0.34} ry={size.h * 0.30} fill="url(#nebula-cyan)" />
+            <ellipse cx={size.w * 0.85} cy={size.h * 0.82} rx={size.w * 0.30} ry={size.h * 0.26} fill="url(#nebula-amber)" />
+            <ellipse cx={size.w * 0.10} cy={size.h * 0.82} rx={size.w * 0.28} ry={size.h * 0.24} fill="url(#nebula-pink)" />
+            {/* Center blue glow */}
+            <ellipse cx={cx} cy={cy} rx={size.w * 0.22} ry={size.h * 0.22} fill="url(#nebula-center)" />
+
+            {/* 별 필드 (Star field: 280개, 크기/밝기 다양) */}
+            {Array.from({ length: 280 }, (_, i) => {
+              const px  = (Math.sin(i * 2.39 + 0.5) * 0.5 + 0.5) * size.w;
+              const py  = (Math.cos(i * 3.71 + 1.2) * 0.5 + 0.5) * size.h;
+              const big = i % 28 === 0;
+              const med = i % 9 === 0;
+              const r   = big ? 1.5 : med ? 1.0 : 0.5;
+              const op  = big ? 0.85 : med ? (0.3 + (i % 5) * 0.08) : (0.1 + (i % 7) * 0.04);
+              const dur = 2.5 + (i % 6) * 0.7;
+              const del = (i % 12) * 0.4;
               return (
                 <circle
                   key={`star-${i}`}
-                  cx={px}
-                  cy={py}
-                  r={i % 11 === 0 ? 1.2 : 0.55}
-                  fill="white"
-                  opacity={0.03 + (i % 5) * 0.018}
+                  cx={px} cy={py} r={r}
+                  fill={i % 20 === 0 ? '#b9d4ff' : i % 17 === 0 ? '#ffeedd' : 'white'}
+                  opacity={op}
+                  style={{
+                    animation: `star-twinkle ${dur}s ease-in-out ${del}s infinite`,
+                    ['--star-base' as string]: op,
+                  }}
                 />
               );
             })}
 
-            {/* ── Lines: center → branch nodes (firefly glow) ── */}
+            {/* ── Lines: center → branch nodes (gradient + firefly) ── */}
             {branchPositions.map(({ branch, x: bx, y: by }) => {
               const isHighlighted = hoveredId === branch.id || hoveredId?.startsWith(branch.id + '-');
-              const pathId = `path-center-${branch.id}`;
-              const pathD = curvePath(cx, cy, bx, by);
+              const pathId  = `path-center-${branch.id}`;
+              const gradId  = `line-grad-${branch.id}`;
+              const pathD   = curvePath(cx, cy, bx, by);
               return (
                 <g key={`line-center-${branch.id}`}>
-                  {/* Glow aura layer */}
-                  <path
-                    d={pathD}
-                    fill="none"
-                    stroke={branch.color}
-                    strokeWidth={7}
-                    strokeOpacity={isHighlighted ? 0.14 : 0.08}
+                  {/* Per-line gradient: center blue → branch color */}
+                  <defs>
+                    <linearGradient id={gradId} x1={cx} y1={cy} x2={bx} y2={by} gradientUnits="userSpaceOnUse">
+                      <stop offset="0%"   stopColor="#3b82f6" stopOpacity="0.9" />
+                      <stop offset="100%" stopColor={branch.color} stopOpacity="0.9" />
+                    </linearGradient>
+                  </defs>
+                  {/* Glow aura */}
+                  <path d={pathD} fill="none"
+                    stroke={branch.color} strokeWidth={9}
+                    strokeOpacity={isHighlighted ? 0.22 : 0.12}
                     filter="url(#line-blur)"
                     style={{ transition: 'stroke-opacity 0.25s ease' }}
                   />
-                  {/* Main line */}
-                  <path
-                    id={pathId}
-                    d={pathD}
-                    fill="none"
-                    stroke={branch.color}
-                    strokeWidth={isHighlighted ? 1.8 : 1.5}
-                    strokeOpacity={isHighlighted ? 0.65 : 0.5}
+                  {/* Main gradient line */}
+                  <path id={pathId} d={pathD} fill="none"
+                    stroke={`url(#${gradId})`}
+                    strokeWidth={isHighlighted ? 2.5 : 2}
+                    strokeOpacity={isHighlighted ? 0.9 : 0.72}
                     strokeDasharray="6 4"
                     style={{
                       animation: 'analytics-dash 1.8s linear infinite',
                       transition: 'stroke-opacity 0.25s ease, stroke-width 0.25s ease',
                     }}
                   />
-                  {/* Firefly dot 1 */}
+                  {/* Firefly dots */}
                   <circle r="3" fill={branch.color} filter="url(#firefly-glow)">
-                    <animateMotion dur="3s" repeatCount="indefinite" begin="0s">
-                      <mpath href={`#${pathId}`} />
-                    </animateMotion>
+                    <animateMotion dur="3s" repeatCount="indefinite" begin="0s"><mpath href={`#${pathId}`} /></animateMotion>
                   </circle>
-                  {/* Firefly dot 2 */}
                   <circle r="2" fill={branch.color} filter="url(#firefly-glow)" opacity="0.7">
-                    <animateMotion dur="3.8s" repeatCount="indefinite" begin="1.2s">
-                      <mpath href={`#${pathId}`} />
-                    </animateMotion>
+                    <animateMotion dur="3.8s" repeatCount="indefinite" begin="1.2s"><mpath href={`#${pathId}`} /></animateMotion>
                   </circle>
-                  {/* Firefly dot 3 */}
                   <circle r="1.5" fill={branch.color} filter="url(#firefly-glow)" opacity="0.5">
-                    <animateMotion dur="2.5s" repeatCount="indefinite" begin="2s">
-                      <mpath href={`#${pathId}`} />
-                    </animateMotion>
+                    <animateMotion dur="2.5s" repeatCount="indefinite" begin="2s"><mpath href={`#${pathId}`} /></animateMotion>
                   </circle>
                 </g>
               );
@@ -575,216 +621,145 @@ export default function AnalyticsPage() {
               });
             })}
 
-            {/* ── Sub-nodes — rounded rect, text inside ── */}
+            {/* ── Sub-nodes → 작은 둥근 사각형 ── */}
             {branchPositions.map(({ branch, x: bx, y: by }) => {
               const subPositions = computeSubNodePositions(
                 branch, bx, by, branch.angle, subDistance - branchDistance,
               );
               return subPositions.map(({ node, x: sx, y: sy }) => {
-                const isHovered = hoveredId === node.id;
+                const isHovered  = hoveredId === node.id;
                 const isSelected = selectedItem?.node?.id === node.id;
-                const label = node.label.length > 10 ? `${node.label.slice(0, 10)}…` : node.label;
-                const nw = 68;
-                const nh = 24;
-                const scale = isHovered || isSelected ? 1.1 : 1.0;
-
+                const active     = isHovered || isSelected;
+                const nw         = Math.max(80, node.label.length * 9 + 20);
+                const nh         = node.sublabel ? 42 : 28;
                 return (
                   <g
                     key={node.id}
-                    transform={`translate(${sx} ${sy}) scale(${scale})`}
-                    style={{ cursor: 'pointer', transition: 'transform 0.2s ease' }}
+                    transform={`translate(${sx} ${sy})`}
+                    style={{ cursor: 'pointer' }}
                     onMouseEnter={() => setHoveredId(node.id)}
                     onMouseLeave={() => setHoveredId(null)}
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelectedItem(isSelected ? null : { type: 'node', branch, node });
+                      setSelectedItem(active ? null : { type: 'node', branch, node });
                     }}
                   >
-                    {/* Soft glow halo */}
-                    <rect
-                      x={-nw / 2 - 8} y={-nh / 2 - 8}
-                      width={nw + 16} height={nh + 16} rx={10}
+                    {/* Glow halo */}
+                    <rect x={-nw/2-6} y={-nh/2-6} width={nw+12} height={nh+12} rx={12}
                       fill={branch.color}
-                      opacity={isHovered || isSelected ? 0.18 : 0.06}
-                      style={{ transition: 'opacity 0.2s ease' }}
-                    />
-                    {/* Main body — rounded rect, no stroke */}
-                    <rect
-                      x={-nw / 2} y={-nh / 2}
-                      width={nw} height={nh} rx={6}
-                      fill={branch.color}
-                      fillOpacity={isHovered || isSelected ? 0.38 : 0.18}
-                      filter={isHovered || isSelected ? `url(#glow-soft-${branch.id})` : undefined}
+                      fillOpacity={active ? 0.22 : 0.10}
                       style={{ transition: 'fill-opacity 0.2s ease' }}
                     />
-                    {/* Text inside */}
+                    {/* Body */}
+                    <rect x={-nw/2} y={-nh/2} width={nw} height={nh} rx={8}
+                      fill="rgba(4,10,28,0.92)"
+                      stroke={branch.color}
+                      strokeWidth={active ? 1.5 : 1}
+                      strokeOpacity={active ? 0.9 : 0.62}
+                      filter="url(#node-glow)"
+                      style={{ transition: 'stroke-opacity 0.2s ease, stroke-width 0.2s ease' }}
+                    />
+                    {/* Label */}
                     <text
-                      y={0} dy="0.35em"
+                      y={node.sublabel ? -5 : 4}
                       textAnchor="middle"
-                      fill={isHovered || isSelected ? 'white' : 'rgba(235,235,245,0.72)'}
-                      fontSize={9.5}
-                      fontWeight={isHovered || isSelected ? 600 : 400}
-                      style={{
-                        fontFamily: 'system-ui, -apple-system, sans-serif',
-                        pointerEvents: 'none',
-                        transition: 'fill 0.2s ease',
-                      }}
-                    >
-                      {label}
-                    </text>
+                      fill={active ? 'white' : 'rgba(235,235,245,0.82)'}
+                      fontSize={10}
+                      fontWeight={active ? 600 : 400}
+                      style={{ fontFamily: 'system-ui, -apple-system, sans-serif', pointerEvents: 'none', transition: 'fill 0.2s ease' }}
+                    >{node.label}</text>
+                    {/* Sublabel */}
+                    {node.sublabel && (
+                      <text y={10} textAnchor="middle"
+                        fill={branch.color} fontSize={8.5}
+                        style={{ fontFamily: 'system-ui, -apple-system, sans-serif', pointerEvents: 'none', opacity: 0.75 }}
+                      >{node.sublabel}</text>
+                    )}
                   </g>
                 );
               });
             })}
 
-            {/* ── Branch nodes ── */}
-            {branchPositions.map(({ branch, x: bx, y: by }) => {
-              const isHovered = hoveredId === branch.id;
-              const isSelected = selectedItem?.branch.id === branch.id && !selectedItem?.node;
-              const bw = Math.max(90, branch.label.length * 12 + 20);
-              const bh = 34;
-              const scale = isHovered || isSelected ? 1.12 : 1.0;
-
-              return (
-                <g
-                  key={branch.id}
-                  transform={`translate(${bx} ${by}) scale(${scale})`}
-                  style={{ cursor: 'pointer', transition: 'transform 0.2s ease' }}
-                  onMouseEnter={() => setHoveredId(branch.id)}
-                  onMouseLeave={() => setHoveredId(null)}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedItem(
-                      isSelected ? null : { type: 'branch', branch },
-                    );
-                  }}
-                >
-                  {/* Ambient glow background */}
-                  <rect
-                    x={-(bw / 2 + 18)} y={-(bh / 2 + 18)}
-                    width={bw + 36} height={bh + 36}
-                    rx={16}
-                    fill={branch.color}
-                    opacity={isHovered || isSelected ? 0.14 : 0.05}
-                    style={{ transition: 'opacity 0.2s ease' }}
-                  />
-                  {/* Main body */}
-                  <rect
-                    x={-bw / 2} y={-bh / 2}
-                    width={bw} height={bh}
-                    rx={10}
-                    fill={`url(#grad-${branch.id})`}
-                    fillOpacity={isHovered || isSelected ? 0.42 : 0.22}
-                    filter={isHovered || isSelected ? `url(#glow-strong-${branch.id})` : `url(#glow-soft-${branch.id})`}
-                    style={{ transition: 'fill-opacity 0.2s ease' }}
-                  />
-                  {/* Specular highlight */}
-                  <ellipse
-                    cx={-bw * 0.18} cy={-bh * 0.22}
-                    rx={bw * 0.2} ry={bh * 0.22}
-                    fill="white"
-                    opacity={isHovered ? 0.18 : 0.07}
-                    style={{ transition: 'opacity 0.2s ease' }}
-                  />
-                  {/* Label */}
-                  <text
-                    y={0}
-                    dy="0.35em"
-                    textAnchor="middle"
-                    fill={isHovered || isSelected ? 'white' : 'rgba(235,235,245,0.88)'}
-                    fontSize={isHovered || isSelected ? 11.5 : 10.5}
-                    fontWeight={700}
-                    style={{
-                      fontFamily: 'system-ui, -apple-system, sans-serif',
-                      pointerEvents: 'none',
-                      transition: 'fill 0.2s ease, font-size 0.2s ease',
+            {/* ── Branch nodes → 중간 둥근 사각형 ── */}
+            {(() => {
+              return branchPositions.map(({ branch, x: bx, y: by }) => {
+                const isHovered  = hoveredId === branch.id;
+                const isSelected = selectedItem?.branch.id === branch.id && !selectedItem?.node;
+                const active     = isHovered || isSelected;
+                const bw         = Math.max(100, branch.label.length * 9.5 + 28);
+                const bh         = 38;
+                return (
+                  <g
+                    key={branch.id}
+                    transform={`translate(${bx} ${by})`}
+                    style={{ cursor: 'pointer' }}
+                    onMouseEnter={() => setHoveredId(branch.id)}
+                    onMouseLeave={() => setHoveredId(null)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedItem(active ? null : { type: 'branch', branch });
                     }}
                   >
-                    {branch.label}
-                  </text>
-                </g>
-              );
-            })}
+                    {/* Glow halo */}
+                    <rect x={-bw/2-10} y={-bh/2-10} width={bw+20} height={bh+20} rx={18}
+                      fill={branch.color} fillOpacity={active ? 0.26 : 0.14}
+                      style={{ transition: 'fill-opacity 0.25s ease' }}
+                    />
+                    {/* Body */}
+                    <rect x={-bw/2} y={-bh/2} width={bw} height={bh} rx={11}
+                      fill="rgba(4,10,28,0.94)"
+                      stroke={branch.color}
+                      strokeWidth={active ? 2.5 : 2}
+                      strokeOpacity={active ? 1 : 0.85}
+                      filter="url(#node-glow)"
+                      style={{ transition: 'stroke-width 0.25s ease, stroke-opacity 0.25s ease' }}
+                    />
+                    {/* Label */}
+                    <text y={4} textAnchor="middle"
+                      fill={active ? 'white' : branch.color}
+                      fontSize={11} fontWeight={700} letterSpacing="0.01em"
+                      style={{ fontFamily: 'system-ui, -apple-system, sans-serif', pointerEvents: 'none', transition: 'fill 0.25s ease' }}
+                    >{branch.label}</text>
+                  </g>
+                );
+              });
+            })()}
 
-            {/* ── Center node ── */}
-            {/* Outer animated pulse ring */}
-            <circle
-              cx={cx} cy={cy} r={68}
-              fill="none"
-              stroke="#0a84ff"
-              strokeWidth={1}
-              strokeOpacity={0.18}
-            >
-              <animate attributeName="r" values="62;78;62" dur="4.5s" repeatCount="indefinite" />
-              <animate attributeName="stroke-opacity" values="0.18;0.04;0.18" dur="4.5s" repeatCount="indefinite" />
-            </circle>
-            {/* Second pulse ring */}
-            <circle
-              cx={cx} cy={cy} r={58}
-              fill="none"
-              stroke="#06b6d4"
-              strokeWidth={0.7}
-              strokeOpacity={0.25}
-            >
-              <animate attributeName="r" values="54;66;54" dur="3.8s" repeatCount="indefinite" begin="0.8s" />
-              <animate attributeName="stroke-opacity" values="0.25;0.06;0.25" dur="3.8s" repeatCount="indefinite" begin="0.8s" />
-            </circle>
-            {/* Static inner ring */}
-            <circle
-              cx={cx} cy={cy} r={60}
-              fill="none"
-              stroke="rgba(255,255,255,0.06)"
-              strokeWidth={1}
+            {/* ── Center node → 파란 테두리 + 검푸른 배경 pill ── */}
+            {/* 배경 글로우 */}
+            <rect x={cx-98} y={cy-42} width={196} height={84} rx={22}
+              fill="none" stroke="#3b82f6" strokeWidth={14} strokeOpacity={0.1}
+              filter="url(#center-glow)"
             />
-            {/* Main center body */}
-            <circle
-              cx={cx} cy={cy} r={56}
-              fill="url(#center-radial)"
-              stroke="#06b6d4"
-              strokeWidth={2}
-              strokeOpacity={0.7}
-              filter="url(#glow-center)"
+            {/* 펄스 링 */}
+            <rect x={cx-90} y={cy-36} width={180} height={72} rx={18}
+              fill="none" stroke="#60a5fa" strokeWidth={1} strokeOpacity={0.25}>
+              <animate attributeName="stroke-opacity" values="0.25;0.04;0.25" dur="3s" repeatCount="indefinite" />
+              <animate attributeName="x" values={`${cx-90};${cx-94};${cx-90}`} dur="3s" repeatCount="indefinite" />
+              <animate attributeName="y" values={`${cy-36};${cy-40};${cy-36}`} dur="3s" repeatCount="indefinite" />
+              <animate attributeName="width" values="180;188;180" dur="3s" repeatCount="indefinite" />
+              <animate attributeName="height" values="72;80;72" dur="3s" repeatCount="indefinite" />
+            </rect>
+            {/* 본체 */}
+            <rect x={cx-84} y={cy-31} width={168} height={62} rx={16}
+              fill="rgba(2,8,28,0.94)" stroke="#3b82f6" strokeWidth={2}
             />
-            {/* Specular ellipse */}
-            <ellipse
-              cx={cx - 14}
-              cy={cy - 14}
-              rx={18}
-              ry={11}
-              fill="white"
-              opacity={0.12}
-              transform={`rotate(-30 ${cx - 14} ${cy - 14})`}
-            />
-            {/* Center label */}
-            <text
-              x={cx}
-              y={cy - 7}
-              textAnchor="middle"
-              fill="white"
-              fontSize={13}
-              fontWeight={700}
-              letterSpacing="-0.02em"
+            {/* 이름 */}
+            <text x={cx} y={cy-6} textAnchor="middle"
+              fill="white" fontSize={18} fontWeight={700} letterSpacing="-0.03em"
               style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
-            >
-              {graph.centerLabel}
-            </text>
-            <text
-              x={cx}
-              y={cy + 10}
-              textAnchor="middle"
-              fill="rgba(100,181,255,0.75)"
-              fontSize={8}
-              letterSpacing="0.08em"
+            >{graph.centerLabel.split(' ')[0]}</text>
+            {/* 역할 */}
+            <text x={cx} y={cy+14} textAnchor="middle"
+              fill="#93c5fd" fontSize={11} letterSpacing="0.05em"
               style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
-            >
-              {graph.centerSublabel.toUpperCase()}
-            </text>
+            >{graph.centerLabel.split(' ').slice(1).join(' ') || graph.centerSublabel}</text>
           </svg>
         )}
 
         {/* ── Detail card overlay ── */}
         {selectedItem && (
-          <DetailCard item={selectedItem} onClose={() => setSelectedItem(null)} />
+          <DetailCard item={selectedItem} onClose={() => setSelectedItem(null)} onChat={handleChatAboutItem} />
         )}
 
         {/* ── Branch legend (bottom-left) ── */}

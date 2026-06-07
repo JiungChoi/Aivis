@@ -9,18 +9,32 @@ import TodoPage from './pages/TodoPage';
 import NotesPage from './pages/NotesPage';
 import CharacterLayer from './components/characters/CharacterLayer';
 import GlobalChatPanel from './components/layout/GlobalChatPanel';
+import CommandPalette from './components/layout/CommandPalette';
 import { useConversationStore } from './stores/conversationStore';
 import { useScheduleReminder } from './hooks/useScheduleReminder';
 import { userService } from './services/userService';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<PageKey>('dashboard');
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const loadSessions = useConversationStore((s) => s.loadSessions);
   useScheduleReminder();
 
   useEffect(() => {
     loadSessions();
     userService.initUser().catch(() => {});
+  }, []);
+
+  // Cmd+K / Ctrl+K to toggle global search
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setPaletteOpen(v => !v);
+      }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, []);
 
   return (
@@ -38,6 +52,11 @@ export default function App() {
         <CharacterLayer />
       </div>
       <GlobalChatPanel />
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        onNavigate={setCurrentPage}
+      />
     </div>
   );
 }

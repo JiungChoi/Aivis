@@ -45,7 +45,7 @@ export const userService = {
     return json.data as UserProfile;
   },
 
-  async updateProfile(updates: { name?: string; email?: string; gender?: string; tone?: string }): Promise<UserProfile> {
+  async updateProfile(updates: { name?: string; email?: string; gender?: string; tone?: string; language?: string }): Promise<UserProfile> {
     const res = await apiFetch(`${BASE}/me`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },

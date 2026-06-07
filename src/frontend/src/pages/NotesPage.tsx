@@ -304,9 +304,39 @@ export default function NotesPage() {
               <button onClick={load} className="text-[11px] text-blue-400 hover:text-blue-300 underline">재시도</button>
             </div>
           ) : notes.length === 0 ? (
-            <div className="text-gray-700 text-[11px] text-center py-8">
-              {search ? '검색 결과가 없습니다.' : 'AI와 대화하면 자동으로 노트가 저장됩니다.'}
-            </div>
+            search ? (
+              <div className="text-gray-700 text-[11px] text-center py-8">검색 결과가 없습니다.</div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 16px 16px', gap: 12, textAlign: 'center' }}>
+                <div style={{
+                  width: 48, height: 48, borderRadius: 16,
+                  background: 'rgba(139,92,246,0.08)',
+                  border: '1px solid rgba(139,92,246,0.18)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <svg style={{ width: 24, height: 24, color: '#8b5cf6' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </div>
+                <div>
+                  <div style={{ color: 'rgba(235,235,245,0.6)', fontSize: 12, fontWeight: 500 }}>아직 노트가 없어요</div>
+                  <div style={{ color: 'rgba(235,235,245,0.2)', fontSize: 10, marginTop: 4, lineHeight: 1.6 }}>
+                    AI와 대화하거나 직접 노트를<br />작성해보세요
+                  </div>
+                </div>
+                <button
+                  onClick={() => { setShowAddForm(true); setSelected(null); }}
+                  style={{
+                    padding: '6px 16px', borderRadius: 10, fontSize: 10, fontWeight: 500,
+                    background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.25)',
+                    color: '#a78bfa', cursor: 'pointer', transition: 'all 0.15s ease',
+                  }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(139,92,246,0.2)'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(139,92,246,0.1)'; }}
+                >노트 작성하기</button>
+              </div>
+            )
           ) : (
             notes.map(n => (
               <div

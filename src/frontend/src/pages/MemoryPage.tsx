@@ -225,9 +225,39 @@ export default function MemoryPage() {
               <button onClick={load} className="text-[11px] text-blue-400 hover:text-blue-300 underline">재시도</button>
             </div>
           ) : filtered.length === 0 ? (
-            <div className="text-gray-700 text-[11px] text-center py-8">
-              {search ? '검색 결과가 없습니다.' : 'AI와 대화하면 자동으로 기억이 저장됩니다.'}
-            </div>
+            search ? (
+              <div className="text-gray-700 text-[11px] text-center py-8">검색 결과가 없습니다.</div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 16px 16px', gap: 12, textAlign: 'center' }}>
+                <div style={{
+                  width: 48, height: 48, borderRadius: 16,
+                  background: 'rgba(10,132,255,0.08)',
+                  border: '1px solid rgba(96,165,250,0.14)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <svg style={{ width: 24, height: 24, color: '#3b82f6' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                      d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                </div>
+                <div>
+                  <div style={{ color: 'rgba(235,235,245,0.6)', fontSize: 12, fontWeight: 500 }}>아직 기억이 없어요</div>
+                  <div style={{ color: 'rgba(235,235,245,0.2)', fontSize: 10, marginTop: 4, lineHeight: 1.6 }}>
+                    AI와 대화하면 중요한 정보가<br />자동으로 저장됩니다
+                  </div>
+                </div>
+                <button
+                  onClick={() => { setShowAddForm(true); setSelected(null); }}
+                  style={{
+                    padding: '6px 16px', borderRadius: 10, fontSize: 10, fontWeight: 500,
+                    background: 'rgba(10,132,255,0.1)', border: '1px solid rgba(96,165,250,0.2)',
+                    color: '#64b5ff', cursor: 'pointer', transition: 'all 0.15s ease',
+                  }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(10,132,255,0.2)'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(10,132,255,0.1)'; }}
+                >직접 알려주기</button>
+              </div>
+            )
           ) : (
             filtered.map(m => (
               <div
