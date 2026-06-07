@@ -446,20 +446,12 @@ export default function FloatingCharacter({
             zIndex: 0,
           }} />
 
-          {/* Character SVG — flipped to face toward viewport center */}
+          {/* Character SVG — floating head only (no body, no ground shadow) */}
           <div ref={svgFlipRef} style={{ position: 'relative', zIndex: 1, transition: 'transform 0.6s ease' }}>
             {gender === 'male'
               ? <MaleChar   primary={primaryColor} hair={hairColor} skin={skinColor} state={charState} walkFrame={walkFrame} uid={id} />
               : <FemaleChar primary={primaryColor} hair={hairColor} skin={skinColor} state={charState} walkFrame={walkFrame} uid={id} />}
           </div>
-
-          {/* Shadow */}
-          <div style={{
-            width: 40, height: 7, borderRadius: '50%',
-            background: `${primaryColor}45`,
-            filter: 'blur(5px)', marginTop: -6,
-            animation: 'char-shadow-pulse 3s ease-in-out infinite',
-          }} />
         </div>
       </div>
     </div>
