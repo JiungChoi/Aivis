@@ -1,4 +1,6 @@
-const BASE = 'http://localhost:5050/api/suggestions';
+import { apiGet } from './apiClient';
+
+const BASE = '/api/suggestions';
 
 export interface SuggestionItem {
   icon: string;
@@ -8,10 +10,5 @@ export interface SuggestionItem {
 }
 
 export const suggestionService = {
-  async get(): Promise<SuggestionItem[]> {
-    const res = await fetch(BASE);
-    if (!res.ok) throw new Error('제안 로드 실패');
-    const json = await res.json();
-    return json.data as SuggestionItem[];
-  },
+  get: () => apiGet<SuggestionItem[]>(BASE, '제안 로드 실패'),
 };

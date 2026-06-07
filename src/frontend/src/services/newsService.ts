@@ -1,4 +1,6 @@
-const BASE = 'http://localhost:5050/api/news';
+import { apiGet } from './apiClient';
+
+const BASE = '/api/news';
 
 export interface NewsItem {
   tag: string;
@@ -9,10 +11,6 @@ export interface NewsItem {
 }
 
 export const newsService = {
-  async getByCategory(category: string): Promise<NewsItem[]> {
-    const res = await fetch(`${BASE}?category=${encodeURIComponent(category)}`);
-    if (!res.ok) throw new Error('뉴스 로드 실패');
-    const json = await res.json();
-    return json.data as NewsItem[];
-  },
+  getByCategory: (category: string) =>
+    apiGet<NewsItem[]>(`${BASE}?category=${encodeURIComponent(category)}`, '뉴스 로드 실패'),
 };

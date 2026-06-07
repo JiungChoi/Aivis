@@ -1,6 +1,6 @@
-import { apiFetch } from './apiClient';
+import { apiGet, apiPost, apiPut, apiDelete } from './apiClient';
 
-const BASE = 'http://localhost:5050/api/schedules';
+const BASE = '/api/schedules';
 
 export type ScheduleCategory = 'Meeting' | 'Work' | 'CodeReview' | 'Rest' | 'Personal' | 'Other';
 
@@ -35,44 +35,19 @@ export interface CreateSchedulePayload {
 }
 
 export const scheduleService = {
-  async getByDate(date: string): Promise<ScheduleItem[]> {
-    const res = await apiFetch(`${BASE}?date=${date}`);
-    if (!res.ok) throw new Error('일정 로드 실패');
-    const json = await res.json();
-    return json.data as ScheduleItem[];
-  },
+  getByDate: (date: string) =>
+    apiGet<ScheduleItem[]>(`${BASE}?date=${date}`, '일정 로드 실패'),
 
-  async getUpcomingReminders(withinMinutes = 10): Promise<ScheduleItem[]> {
-    const res = await apiFetch(`${BASE}/reminders/upcoming?withinMinutes=${withinMinutes}`);
-    if (!res.ok) return [];
-    const json = await res.json();
-    return json.data as ScheduleItem[];
-  },
+  getUpcomingReminders: (withinMinutes = 10) =>
+    apiGet<ScheduleItem[]>(`${BASE}/reminders/upcoming?withinMinutes=${withinMinutes}`)
+      .catch(() => [] as ScheduleItem[]),
 
-  async create(payload: CreateSchedulePayload): Promise<ScheduleItem> {
-    const res = await apiFetch(BASE, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) throw new Error('일정 생성 실패');
-    const json = await res.json();
-    return json.data as ScheduleItem;
-  },
+  create: (payload: CreateSchedulePayload) =>
+    apiPost<ScheduleItem>(BASE, payload, '일정 생성 실패'),
 
-  async update(id: string, payload: CreateSchedulePayload): Promise<ScheduleItem> {
-    const res = await apiFetch(`${BASE}/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) throw new Error('일정 수정 실패');
-    const json = await res.json();
-    return json.data as ScheduleItem;
-  },
+  update: (id: string, payload: CreateSchedulePayload) =>
+    apiPut<ScheduleItem>(`${BASE}/${id}`, payload, '일정 수정 실패'),
 
-  async remove(id: string): Promise<void> {
-    const res = await apiFetch(`${BASE}/${id}`, { method: 'DELETE' });
-    if (!res.ok) throw new Error('일정 삭제 실패');
-  },
+  remove: (id: string) =>
+    apiDelete(`${BASE}/${id}`, '일정 삭제 실패'),
 };

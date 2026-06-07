@@ -6,6 +6,7 @@ import {
   MAX_CUSTOM,
 } from '../stores/characterStore';
 import { AIVIS_CHARACTER, DEFAULT_CHARACTERS, COLOR_PRESETS } from '../components/characters/CharacterConfig';
+import { API_BASE } from '../config';
 import { CharacterPreview } from '../components/characters/FloatingCharacter';
 
 const PROFILE_CACHE_KEY = 'aivis_user_profile';
@@ -558,7 +559,7 @@ export default function SettingsPage() {
             <span className="text-gray-500 text-[11px]">Docker / Local</span>
           </SettingRow>
           <SettingRow label="백엔드">
-            <span className="text-gray-500 text-[11px] font-mono">localhost:5050</span>
+            <span className="text-gray-500 text-[11px] font-mono">{API_BASE.replace(/^https?:\/\//, '')}</span>
           </SettingRow>
         </SettingSection>
       </div>

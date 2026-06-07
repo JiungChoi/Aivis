@@ -1,9 +1,10 @@
 import { create } from 'zustand';
+import { API_BASE } from '../config';
 
 interface SettingsState {
   apiBaseUrl: string;
 }
 
 export const useSettingsStore = create<SettingsState>(() => ({
-  apiBaseUrl: 'http://localhost:5050',
+  apiBaseUrl: API_BASE,
 }));

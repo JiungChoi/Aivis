@@ -1,7 +1,7 @@
 import type { Message, Session } from '../types';
 import { apiFetch } from './apiClient';
 
-const BASE_URL = 'http://localhost:5050/api/conversations';
+const BASE_URL = '/api/conversations';
 
 async function parseResponse<T>(res: Response): Promise<T> {
   const json = await res.json();
