@@ -175,6 +175,34 @@ export default function GlobalChatPanel() {
           sidebarWidth={PANEL_WIDTH}
           contained={true}
         />
+
+        {/* ── AIVIS 명찰 (반투명 글래스 배지) ── */}
+        <div style={{
+          position: 'absolute',
+          bottom: 12,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          display: 'flex', alignItems: 'center', gap: 7,
+          padding: '5px 14px',
+          borderRadius: 10,
+          background: 'rgba(0, 207, 255, 0.07)',
+          border: '1px solid rgba(0, 207, 255, 0.30)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
+          boxShadow: '0 2px 16px rgba(0,207,255,0.12)',
+          pointerEvents: 'none',
+        }}>
+          <span style={{
+            width: 6, height: 6, borderRadius: '50%',
+            background: recording ? '#ff4d4d' : '#34d399',
+            boxShadow: `0 0 6px ${recording ? '#ff4d4d' : '#34d399'}`,
+          }} />
+          <span style={{
+            color: '#4af4ff', fontSize: 12, fontWeight: 700,
+            letterSpacing: '0.18em', textShadow: '0 0 10px rgba(0,207,255,0.5)',
+          }}>AIVIS</span>
+          <span style={{ color: 'rgba(192,240,255,0.45)', fontSize: 9, letterSpacing: '0.04em' }}>호스트 AI</span>
+        </div>
       </div>
 
       {/* ── Chat section — bottom 50% ── */}
@@ -197,7 +225,6 @@ export default function GlobalChatPanel() {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#34d399' }} />
-            <span style={{ color: 'white', fontSize: 12, fontWeight: 600 }}>AIVIS</span>
             {activeSessionId && (
               <span style={{ color: 'rgba(156,163,175,0.5)', fontSize: 9, fontFamily: 'monospace' }}>
                 #{activeSessionId.slice(-6)}
