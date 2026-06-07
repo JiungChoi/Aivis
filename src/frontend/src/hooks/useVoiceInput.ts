@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { voiceService } from '../services/voiceService';
 
 // Web Speech API minimal type shims
 interface SpeechRecognitionResult { readonly [index: number]: { transcript: string }; readonly isFinal: boolean; }
@@ -107,12 +108,7 @@ export function useVoiceInput({ onTranscribed, onAutoSend, inputRef }: UseVoiceI
 
       try {
         const wavBlob = await toWav(rawBlob);
-        const form = new FormData();
-        form.append('audio', wavBlob, 'recording.wav');
-        const res = await fetch('http://localhost:5050/api/voice/transcribe', { method: 'POST', body: form });
-        if (!res.ok) throw new Error('STT 실패');
-        const json = await res.json();
-        const text: string = (json.data as string)?.trim() ?? '';
+        const text = (await voiceService.transcribe(wavBlob)).trim();
         if (!text) return;
         if (autoSendRef.current) onAutoSendRef.current(text);
         else onTranscribedRef.current(text);

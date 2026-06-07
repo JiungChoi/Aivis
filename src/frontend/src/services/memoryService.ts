@@ -1,6 +1,6 @@
-import { apiFetch } from './apiClient';
+import { apiGet, apiPost, apiDelete } from './apiClient';
 
-const BASE = 'http://localhost:5050/api/memory';
+const BASE = '/api/memory';
 
 export interface MemoryItem {
   id: string;
@@ -19,26 +19,10 @@ export interface UpsertMemoryPayload {
 }
 
 export const memoryService = {
-  async list(): Promise<MemoryItem[]> {
-    const res = await apiFetch(BASE);
-    if (!res.ok) throw new Error('메모리 로드 실패');
-    const json = await res.json();
-    return json.data as MemoryItem[];
-  },
+  list: () => apiGet<MemoryItem[]>(BASE, '메모리 로드 실패'),
 
-  async upsert(payload: UpsertMemoryPayload): Promise<MemoryItem> {
-    const res = await apiFetch(BASE, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...payload, source: payload.source ?? 'manual' }),
-    });
-    if (!res.ok) throw new Error('메모리 저장 실패');
-    const json = await res.json();
-    return json.data as MemoryItem;
-  },
+  upsert: (payload: UpsertMemoryPayload) =>
+    apiPost<MemoryItem>(BASE, { ...payload, source: payload.source ?? 'manual' }, '메모리 저장 실패'),
 
-  async remove(id: string): Promise<void> {
-    const res = await apiFetch(`${BASE}/${id}`, { method: 'DELETE' });
-    if (!res.ok) throw new Error('메모리 삭제 실패');
-  },
+  remove: (id: string) => apiDelete(`${BASE}/${id}`, '메모리 삭제 실패'),
 };

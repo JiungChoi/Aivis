@@ -1,17 +1,19 @@
-const BASE = 'http://localhost:5050/api/voice';
+import { apiFetch } from './apiClient';
+
+const BASE = '/api/voice';
 
 export const voiceService = {
   async transcribe(audioBlob: Blob): Promise<string> {
     const form = new FormData();
     form.append('audio', audioBlob, 'recording.wav');
-    const res = await fetch(`${BASE}/transcribe`, { method: 'POST', body: form });
+    const res = await apiFetch(`${BASE}/transcribe`, { method: 'POST', body: form });
     if (!res.ok) throw new Error('STT 실패');
     const json = await res.json();
     return (json.data as string) ?? '';
   },
 
   async synthesize(text: string, voice?: string): Promise<ArrayBuffer> {
-    const res = await fetch(`${BASE}/synthesize`, {
+    const res = await apiFetch(`${BASE}/synthesize`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text, voice }),

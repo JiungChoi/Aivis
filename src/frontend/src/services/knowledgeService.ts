@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:5050';
+import { apiFetch } from './apiClient';
 
 export interface KnowledgeNode {
   id: string;
@@ -138,7 +138,7 @@ export class KnowledgeRepository {
   async getGraphWithDynamicData(): Promise<KnowledgeGraph> {
     const base = this.getGraph();
     try {
-      const res = await fetch(`${API_BASE}/api/knowledge/graph`);
+      const res = await apiFetch('/api/knowledge/graph');
       if (!res.ok) return base;
       const json = await res.json();
       const dynamicNodes: DynamicNode[] = json.data ?? [];

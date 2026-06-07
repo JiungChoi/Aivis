@@ -1,6 +1,6 @@
-import { apiFetch } from './apiClient';
+import { apiGet, apiPost, apiPut, apiDelete } from './apiClient';
 
-const BASE = 'http://localhost:5050/api/todos';
+const BASE = '/api/todos';
 
 export type TodoPriority = 'low' | 'normal' | 'high';
 
@@ -28,45 +28,22 @@ export interface UpdateTodoPayload extends CreateTodoPayload {
 }
 
 export const todoService = {
-  async list(): Promise<TodoItem[]> {
-    const res = await apiFetch(BASE);
-    if (!res.ok) throw new Error('할 일 로드 실패');
-    const json = await res.json();
-    return json.data as TodoItem[];
-  },
+  list: () => apiGet<TodoItem[]>(BASE, '할 일 로드 실패'),
 
-  async create(payload: CreateTodoPayload): Promise<TodoItem> {
-    const res = await apiFetch(BASE, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...payload, priority: payload.priority ?? 'normal' }),
-    });
-    if (!res.ok) throw new Error('할 일 생성 실패');
-    return (await res.json()).data as TodoItem;
-  },
+  create: (payload: CreateTodoPayload) =>
+    apiPost<TodoItem>(BASE, { ...payload, priority: payload.priority ?? 'normal' }, '할 일 생성 실패'),
 
-  async update(id: string, payload: UpdateTodoPayload): Promise<TodoItem> {
-    const res = await apiFetch(`${BASE}/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) throw new Error('할 일 수정 실패');
-    return (await res.json()).data as TodoItem;
-  },
+  update: (id: string, payload: UpdateTodoPayload) =>
+    apiPut<TodoItem>(`${BASE}/${id}`, payload, '할 일 수정 실패'),
 
-  async toggle(item: TodoItem): Promise<TodoItem> {
-    return todoService.update(item.id, {
+  toggle: (item: TodoItem) =>
+    todoService.update(item.id, {
       title: item.title,
       description: item.description,
       priority: item.priority,
       dueDate: item.dueDate,
       isCompleted: !item.isCompleted,
-    });
-  },
+    }),
 
-  async remove(id: string): Promise<void> {
-    const res = await apiFetch(`${BASE}/${id}`, { method: 'DELETE' });
-    if (!res.ok) throw new Error('할 일 삭제 실패');
-  },
+  remove: (id: string) => apiDelete(`${BASE}/${id}`, '할 일 삭제 실패'),
 };

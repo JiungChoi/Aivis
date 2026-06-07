@@ -1,6 +1,6 @@
-import { apiFetch } from './apiClient';
+import { apiGet, apiPost, apiDelete } from './apiClient';
 
-const BASE = 'http://localhost:5050/api/notes';
+const BASE = '/api/notes';
 
 export interface NoteItem {
   id: string;
@@ -20,33 +20,13 @@ export interface CreateNotePayload {
 }
 
 export const noteService = {
-  async list(limit = 20): Promise<NoteItem[]> {
-    const res = await apiFetch(`${BASE}?limit=${limit}`);
-    if (!res.ok) throw new Error('노트 로드 실패');
-    const json = await res.json();
-    return json.data as NoteItem[];
-  },
+  list: (limit = 20) => apiGet<NoteItem[]>(`${BASE}?limit=${limit}`, '노트 로드 실패'),
 
-  async search(query: string): Promise<NoteItem[]> {
-    const res = await apiFetch(`${BASE}/search?q=${encodeURIComponent(query)}`);
-    if (!res.ok) throw new Error('노트 검색 실패');
-    const json = await res.json();
-    return json.data as NoteItem[];
-  },
+  search: (query: string) =>
+    apiGet<NoteItem[]>(`${BASE}/search?q=${encodeURIComponent(query)}`, '노트 검색 실패'),
 
-  async create(payload: CreateNotePayload): Promise<NoteItem> {
-    const res = await apiFetch(BASE, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) throw new Error('노트 생성 실패');
-    const json = await res.json();
-    return json.data as NoteItem;
-  },
+  create: (payload: CreateNotePayload) =>
+    apiPost<NoteItem>(BASE, payload, '노트 생성 실패'),
 
-  async remove(id: string): Promise<void> {
-    const res = await apiFetch(`${BASE}/${id}`, { method: 'DELETE' });
-    if (!res.ok) throw new Error('노트 삭제 실패');
-  },
+  remove: (id: string) => apiDelete(`${BASE}/${id}`, '노트 삭제 실패'),
 };
