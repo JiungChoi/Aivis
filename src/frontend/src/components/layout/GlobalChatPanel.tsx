@@ -258,8 +258,8 @@ export default function GlobalChatPanel() {
           }}>
             {sessions.slice().reverse().map((s) => {
               const isActive = s.id === activeSessionId;
-              const label = new Date(s.createdAt).toLocaleDateString('ko-KR', {
-                month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+              const dateLabel = new Date(s.createdAt).toLocaleDateString('ko-KR', {
+                month: 'short', day: 'numeric',
               });
               return (
                 <div
@@ -277,10 +277,13 @@ export default function GlobalChatPanel() {
                     onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)'; }}
                     onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'none'; }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, overflow: 'hidden' }}>
                       {isActive && <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#34d399', flexShrink: 0 }} />}
-                      <span style={{ fontSize: 10, color: isActive ? '#e2e8f0' : '#6b7280' }}>{label}</span>
-                      <span style={{ fontSize: 9, color: '#374151', fontFamily: 'monospace' }}>#{s.id.slice(-6)}</span>
+                      <span style={{
+                        fontSize: 10, color: isActive ? '#e2e8f0' : '#9ca3af',
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1,
+                      }}>{s.title || '새 대화'}</span>
+                      <span style={{ fontSize: 9, color: '#4b5563', flexShrink: 0 }}>{dateLabel}</span>
                     </div>
                   </button>
                   <button

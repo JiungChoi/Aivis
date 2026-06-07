@@ -97,19 +97,42 @@ export default function SettingsPage() {
   const [profileName, setProfileName] = useState('');
   const [profileEmail, setProfileEmail] = useState('');
   const [profileRole, setProfileRole] = useState('');
+  const [profileLanguage, setProfileLanguage] = useState('Korean');
+  const [profileTone, setProfileTone] = useState('casual');
   const [profileSaved, setProfileSaved] = useState(false);
 
   useEffect(() => {
-    const p = loadProfile();
-    setProfileName(p.name || '');
-    setProfileEmail(p.email || '');
-    setProfileRole(p.role || '');
+    // Load from backend first, fall back to localStorage
+    userService.getProfile()
+      .then(p => {
+        setProfileName(p.name || '');
+        setProfileEmail(p.email || '');
+        setProfileLanguage(p.language || 'Korean');
+        setProfileTone(p.tone || 'casual');
+        const cached = loadProfile();
+        setProfileRole(cached.role || '');
+      })
+      .catch(() => {
+        const p = loadProfile();
+        setProfileName(p.name || '');
+        setProfileEmail(p.email || '');
+        setProfileRole(p.role || '');
+        setProfileLanguage(p.language || 'Korean');
+        setProfileTone(p.tone || 'casual');
+      });
   }, []);
 
   async function handleSaveProfile() {
-    localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify({ name: profileName, email: profileEmail, role: profileRole }));
+    localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify({
+      name: profileName, email: profileEmail, role: profileRole,
+      language: profileLanguage, tone: profileTone,
+    }));
+    window.dispatchEvent(new CustomEvent('aivis:profile-updated'));
     try {
-      await userService.updateProfile({ name: profileName, email: profileEmail });
+      await userService.updateProfile({
+        name: profileName, email: profileEmail,
+        language: profileLanguage, tone: profileTone,
+      });
     } catch { /* offline fallback: profile saved locally */ }
     setProfileSaved(true);
     setTimeout(() => setProfileSaved(false), 2500);
@@ -231,6 +254,34 @@ export default function SettingsPage() {
                   color: '#e2e8f0', outline: 'none',
                 }}
               />
+              <div style={{ display: 'flex', gap: 8 }}>
+                <select
+                  value={profileLanguage}
+                  onChange={e => setProfileLanguage(e.target.value)}
+                  style={{
+                    flex: 1, borderRadius: 8, padding: '7px 10px', fontSize: 12,
+                    background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(84,84,88,0.4)',
+                    color: '#e2e8f0', outline: 'none', cursor: 'pointer',
+                  }}
+                >
+                  <option value="Korean">한국어</option>
+                  <option value="English">English</option>
+                  <option value="Japanese">日本語</option>
+                </select>
+                <select
+                  value={profileTone}
+                  onChange={e => setProfileTone(e.target.value)}
+                  style={{
+                    flex: 1, borderRadius: 8, padding: '7px 10px', fontSize: 12,
+                    background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(84,84,88,0.4)',
+                    color: '#e2e8f0', outline: 'none', cursor: 'pointer',
+                  }}
+                >
+                  <option value="casual">캐주얼 (반말)</option>
+                  <option value="formal">격식체 (존댓말)</option>
+                  <option value="professional">전문적</option>
+                </select>
+              </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <button
                   onClick={handleSaveProfile}

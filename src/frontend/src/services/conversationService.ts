@@ -23,6 +23,7 @@ function normalizeSession(raw: Record<string, unknown>): Session {
   return {
     id: raw.id as string,
     userId: raw.userId as string,
+    title: (raw.title as string | undefined) ?? '새 대화',
     status: raw.status as string,
     messages: messages.map(normalizeMessage),
     createdAt: raw.createdAt as string,
