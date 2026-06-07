@@ -52,3 +52,23 @@ Mr. Choi가 커맨드 없이 지시해도, Aibis는 작업 성격을 판단해�
 
 - 코드는 항상 실제 동작하는 수준으로 작성
 - 한국어로 대화, 코드 주석은 영어
+
+---
+
+## Git-Flow (⚠️ 무조건 준수)
+
+**모든 개발은 git-flow 를 따른다. 예외 없음.** 상세: [`documents/06_process/git-flow.md`](documents/06_process/git-flow.md)
+
+핵심 하드 룰:
+1. `main` 직접 커밋·push **금지** (release/hotfix 머지로만 갱신)
+2. `develop` 직접 작업 **금지** — 항상 `feature/*` 분기 후 `git merge --no-ff` 로 머지
+3. 비밀키(`Environments/**/.env`, API 키, DB 비번) 커밋 **금지**
+4. 머지 전 빌드/타입체크 통과 필수 (`npm run build` / `dotnet build`)
+5. 커밋은 Conventional Commits (`feat/fix/refactor/docs/chore/...`), 백엔드·프론트 분리
+6. 기능 브랜치는 머지 후 삭제
+
+작업 시작 전 항상: `git checkout develop && git pull && git checkout -b feature/<scope>-<desc>`
+
+## 계획 문서
+- 리팩토링: [`documents/03_architecture/refactoring-plan.md`](documents/03_architecture/refactoring-plan.md)
+- UI 구체화: [`documents/04_ux/ui-refinement-plan.md`](documents/04_ux/ui-refinement-plan.md)
