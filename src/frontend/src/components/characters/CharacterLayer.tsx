@@ -5,13 +5,9 @@ import { useCharacters } from '../../stores/characterStore';
 import { memoryService } from '../../services/memoryService';
 import { scheduleService, type ScheduleItem } from '../../services/scheduleService';
 import { getLLMSuggestion } from '../../services/characterSuggestionService';
+import { todayKey } from '../../utils/time';
 
 const SUGGESTION_INTERVAL_MS = 3 * 60 * 1000;
-
-function todayKey() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
 
 function buildZones(w: number, h: number) {
   const cols = 4;

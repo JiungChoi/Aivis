@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { scheduleService, type ScheduleItem, type ScheduleCategory, SCHEDULE_CATEGORIES } from '../services/scheduleService';
+import { toMins, minsToTimeStr } from '../utils/time';
 
 const SLOT_H = 28;
 
@@ -12,8 +13,6 @@ const CATEGORY_BG: Record<string, { bg: string; border: string; text: string }> 
   Other:      { bg: 'rgba(107,114,128,0.10)', border: 'rgba(107,114,128,0.25)', text: '#9ca3af' },
 };
 
-function toMins(t: string) { const [h, m] = t.split(':').map(Number); return h * 60 + m; }
-function minsToTimeStr(m: number) { return `${String(Math.floor(m / 60) % 24).padStart(2,'0')}:${String(m % 60).padStart(2,'0')}`; }
 function toDateKey(y: number, mo: number, d: number) { return `${y}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
 
 // ── Add Event Modal ────────────────────────────────────────────
