@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { userService, type UserProfile } from '../services/userService';
-import { scheduleService, type ScheduleItem, type ScheduleCategory, SCHEDULE_CATEGORIES } from '../services/scheduleService';
+import { scheduleService, type ScheduleItem, type ScheduleCategory } from '../services/scheduleService';
 import { newsService, type NewsItem } from '../services/newsService';
 import { weatherService, type WeatherData, CITIES } from '../services/weatherService';
 import { noteService, type NoteItem } from '../services/noteService';
@@ -18,201 +18,11 @@ interface AiScheduleSuggestion {
 import { TimeAnalysisPanel } from '../components/dashboard/TimeAnalysisPanel';
 import { SuggestionsPanel } from '../components/dashboard/SuggestionsPanel';
 import { NotesPanel } from '../components/dashboard/NotesPanel';
+import { AddEventModal } from '../components/dashboard/AddEventModal';
+import { ResizeHandle } from '../components/dashboard/ResizeHandle';
+import { SLOT_H, CATEGORY_BG, TAG_COLORS, type NewsTab, NEWS_TABS } from '../components/dashboard/dashboardConstants';
 import { toMins, minsToTimeStr, todayISO } from '../utils/time';
 import { greeting, dateStr } from '../utils/format';
-
-const SLOT_H = 28;
-
-const CATEGORY_BG: Record<string, { bg: string; border: string; text: string }> = {
-  Meeting:    { bg: 'rgba(139,92,246,0.15)', border: 'rgba(139,92,246,0.35)', text: '#c4b5fd' },
-  Work:       { bg: 'rgba(59,130,246,0.15)',  border: 'rgba(59,130,246,0.35)',  text: 'rgba(100,181,255,0.85)' },
-  CodeReview: { bg: 'rgba(16,185,129,0.15)',  border: 'rgba(16,185,129,0.35)',  text: '#6ee7b7' },
-  Rest:       { bg: 'rgba(107,114,128,0.10)', border: 'rgba(107,114,128,0.25)', text: '#9ca3af' },
-  Personal:   { bg: 'rgba(251,191,36,0.12)',  border: 'rgba(251,191,36,0.3)',   text: '#fcd34d' },
-  Other:      { bg: 'rgba(107,114,128,0.10)', border: 'rgba(107,114,128,0.25)', text: '#9ca3af' },
-};
-
-// ── 뉴스 탭 ──────────────────────────────────────────────────
-type NewsTab = '전체' | '경영·경제' | 'AI·에이전트' | '기술' | '글로벌';
-
-// ── 태그 색상 (뉴스) ─────────────────────────────────────────
-const TAG_COLORS: Record<string, string> = {
-  미팅:    'bg-violet-500/20 text-violet-300',
-  작업:    'bg-blue-500/20 text-blue-300',
-  코드리뷰: 'bg-emerald-500/20 text-emerald-300',
-  휴식:    'bg-gray-500/20 text-gray-500',
-  개인:    'bg-amber-500/20 text-amber-300',
-  기타:    'bg-gray-500/20 text-gray-400',
-  AI:      'bg-blue-500/20 text-blue-300',
-  경제:    'bg-amber-500/20 text-amber-300',
-  경영:    'bg-orange-500/20 text-orange-300',
-  에이전트: 'bg-violet-500/20 text-violet-300',
-  기술:    'bg-emerald-500/20 text-emerald-300',
-  글로벌:  'bg-rose-500/20 text-rose-300',
-};
-
-// ── 이벤트 추가 모달 ─────────────────────────────────────────
-interface AddEventModalProps {
-  startTime: string;
-  endTime: string;
-  onClose: () => void;
-  onConfirm: (title: string, startTime: string, endTime: string, category: ScheduleCategory) => void;
-}
-
-function AddEventModal({ startTime: initialStart, endTime: initialEnd, onClose, onConfirm }: AddEventModalProps) {
-  const [title, setTitle] = useState('');
-  const [startTime, setStartTime] = useState(initialStart);
-  const [endTime, setEndTime] = useState(initialEnd);
-  const [category, setCategory] = useState<ScheduleCategory>('Work');
-  const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose();
-    }
-    document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [onClose]);
-
-  async function handleConfirm() {
-    if (!title.trim() || submitting) return;
-    setSubmitting(true);
-    await onConfirm(title.trim(), startTime, endTime, category);
-    setSubmitting(false);
-  }
-
-  return (
-    <div
-      style={{
-        position: 'fixed', inset: 0, zIndex: 9999,
-        background: 'rgba(0,0,0,0.6)',
-        backdropFilter: 'blur(8px)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}
-      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      <div
-        style={{
-          width: 340,
-          background: '#1c1c1e',
-          borderRadius: 16,
-          padding: 24,
-          border: '1px solid rgba(255,255,255,0.08)',
-          boxShadow: '0 24px 80px rgba(0,0,0,0.7)',
-        }}
-        onMouseDown={(e) => e.stopPropagation()}
-      >
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ color: 'rgba(235,235,245,0.5)', fontSize: 11, marginBottom: 4 }}>새 일정 추가</div>
-          <input
-            type="text"
-            placeholder="일정 이름"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') handleConfirm(); }}
-            autoFocus
-            style={{
-              width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid rgba(255,255,255,0.12)',
-              outline: 'none', color: '#f1f5f9', fontSize: 16, fontWeight: 500,
-              padding: '4px 0 8px', caretColor: '#0a84ff',
-            }}
-          />
-        </div>
-
-        <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ color: 'rgba(235,235,245,0.4)', fontSize: 10, marginBottom: 4 }}>시작</div>
-            <input
-              type="time"
-              value={startTime}
-              onChange={(e) => setStartTime(e.target.value)}
-              style={{
-                width: '100%', background: '#2c2c2e', border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 8, outline: 'none', color: '#0a84ff', fontSize: 13,
-                fontWeight: 500, padding: '6px 10px',
-              }}
-            />
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ color: 'rgba(235,235,245,0.4)', fontSize: 10, marginBottom: 4 }}>종료</div>
-            <input
-              type="time"
-              value={endTime}
-              onChange={(e) => setEndTime(e.target.value)}
-              style={{
-                width: '100%', background: '#2c2c2e', border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 8, outline: 'none', color: '#0a84ff', fontSize: 13,
-                fontWeight: 500, padding: '6px 10px',
-              }}
-            />
-          </div>
-        </div>
-
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ color: 'rgba(235,235,245,0.4)', fontSize: 10, marginBottom: 8 }}>카테고리</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-            {SCHEDULE_CATEGORIES.map(({ value, label }) => (
-              <button
-                key={value}
-                onClick={() => setCategory(value)}
-                style={{
-                  padding: '4px 10px', borderRadius: 20, fontSize: 11, fontWeight: 500, cursor: 'pointer',
-                  border: `1px solid ${category === value ? 'rgba(10,132,255,0.6)' : 'rgba(255,255,255,0.08)'}`,
-                  background: category === value ? 'rgba(10,132,255,0.2)' : 'rgba(255,255,255,0.04)',
-                  color: category === value ? '#0a84ff' : 'rgba(235,235,245,0.4)',
-                  transition: 'all 0.15s ease',
-                }}
-              >{label}</button>
-            ))}
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button
-            onClick={onClose}
-            style={{
-              padding: '10px 16px', borderRadius: 10, fontSize: 13, cursor: 'pointer',
-              border: 'none', background: 'transparent', color: 'rgba(235,235,245,0.4)',
-            }}
-          >취소</button>
-          <button
-            onClick={handleConfirm}
-            disabled={!title.trim() || submitting}
-            style={{
-              flex: 1, padding: '10px', borderRadius: 10, fontSize: 13, fontWeight: 600,
-              border: 'none', cursor: title.trim() ? 'pointer' : 'default',
-              background: title.trim() ? '#0a84ff' : 'rgba(10,132,255,0.25)',
-              color: title.trim() ? '#fff' : 'rgba(255,255,255,0.3)',
-              transition: 'background 0.15s ease',
-            }}
-          >{submitting ? '추가 중...' : '추가'}</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── 리사이즈 핸들 ────────────────────────────────────────────
-function ResizeHandle({ onMouseDown }: { onMouseDown: (e: React.MouseEvent) => void }) {
-  const lineRef = useRef<HTMLDivElement>(null);
-  return (
-    <div
-      onMouseDown={onMouseDown}
-      style={{
-        width: 8,
-        flexShrink: 0,
-        cursor: 'col-resize',
-        display: 'flex',
-        alignItems: 'stretch',
-        justifyContent: 'center',
-      }}
-      onMouseEnter={() => { if (lineRef.current) lineRef.current.style.background = 'rgba(59,130,246,0.5)'; }}
-      onMouseLeave={() => { if (lineRef.current) lineRef.current.style.background = 'rgba(255,255,255,0.05)'; }}
-    >
-      <div ref={lineRef} style={{ width: 1, background: 'rgba(255,255,255,0.05)', transition: 'background 0.15s ease' }} />
-    </div>
-  );
-}
 
 // ── 메인 컴포넌트 ─────────────────────────────────────────────
 export default function HomePage() {
@@ -644,8 +454,6 @@ export default function HomePage() {
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup', onUp);
   }
-
-  const NEWS_TABS: NewsTab[] = ['전체', '경영·경제', 'AI·에이전트', '기술', '글로벌'];
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden" style={{
