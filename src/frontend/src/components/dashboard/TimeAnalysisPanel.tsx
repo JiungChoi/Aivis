@@ -1,4 +1,5 @@
 import type { ScheduleItem } from '../../services/scheduleService';
+import { toMins } from '../../utils/time';
 
 const CATEGORY_CHART_META: Record<string, { label: string; color: string }> = {
   Work:       { label: '집중 작업', color: '#3b82f6' },
@@ -53,11 +54,6 @@ function DonutChart({ segments, totalHours }: { segments: ChartSegment[]; totalH
       )}
     </div>
   );
-}
-
-function toMins(t: string) {
-  const [h, m] = t.split(':').map(Number);
-  return h * 60 + m;
 }
 
 function buildChartData(schedule: ScheduleItem[]) {

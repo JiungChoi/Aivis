@@ -18,11 +18,8 @@ interface AiScheduleSuggestion {
 import { TimeAnalysisPanel } from '../components/dashboard/TimeAnalysisPanel';
 import { SuggestionsPanel } from '../components/dashboard/SuggestionsPanel';
 import { NotesPanel } from '../components/dashboard/NotesPanel';
-
-function toMins(t: string) {
-  const [h, m] = t.split(':').map(Number);
-  return h * 60 + m;
-}
+import { toMins, minsToTimeStr, todayISO } from '../utils/time';
+import { greeting, dateStr } from '../utils/format';
 
 const SLOT_H = 28;
 
@@ -34,12 +31,6 @@ const CATEGORY_BG: Record<string, { bg: string; border: string; text: string }> 
   Personal:   { bg: 'rgba(251,191,36,0.12)',  border: 'rgba(251,191,36,0.3)',   text: '#fcd34d' },
   Other:      { bg: 'rgba(107,114,128,0.10)', border: 'rgba(107,114,128,0.25)', text: '#9ca3af' },
 };
-
-function minsToTimeStr(mins: number): string {
-  const h = Math.floor(mins / 60) % 24;
-  const m = mins % 60;
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-}
 
 // ── 뉴스 탭 ──────────────────────────────────────────────────
 type NewsTab = '전체' | '경영·경제' | 'AI·에이전트' | '기술' | '글로벌';
@@ -59,20 +50,6 @@ const TAG_COLORS: Record<string, string> = {
   기술:    'bg-emerald-500/20 text-emerald-300',
   글로벌:  'bg-rose-500/20 text-rose-300',
 };
-
-// ── 날짜 포맷 ─────────────────────────────────────────────────
-function greeting() {
-  const h = new Date().getHours();
-  if (h < 12) return '좋은 아침입니다';
-  if (h < 18) return '좋은 오후입니다';
-  return '좋은 저녁입니다';
-}
-
-function dateStr() {
-  return new Date().toLocaleDateString('ko-KR', {
-    year: 'numeric', month: 'long', day: 'numeric', weekday: 'long',
-  });
-}
 
 // ── 이벤트 추가 모달 ─────────────────────────────────────────
 interface AddEventModalProps {
@@ -261,7 +238,7 @@ export default function HomePage() {
 
   // Load today's schedule
   const loadSchedule = () => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = todayISO();
     setScheduleError(false);
     scheduleService.getByDate(today).then(setSchedule).catch(() => setScheduleError(true));
   };
@@ -372,7 +349,7 @@ export default function HomePage() {
     const relY = e.clientY - rect.top;
     const slotIndex = Math.max(0, Math.min(47, Math.floor(relY / SLOT_H)));
     const dropMins = slotIndex * 30;
-    const today = new Date().toISOString().split('T')[0];
+    const today = todayISO();
 
     const sugRaw = e.dataTransfer.getData('application/aivis-suggestion');
     if (sugRaw) {
@@ -425,7 +402,7 @@ export default function HomePage() {
   }
 
   async function handleAddSuggestionToSchedule(title: string, index?: number) {
-    const today = new Date().toISOString().split('T')[0];
+    const today = todayISO();
     const now = new Date();
     const currentMins = now.getHours() * 60 + now.getMinutes();
     const fresh = await scheduleService.getByDate(today);
@@ -447,7 +424,7 @@ export default function HomePage() {
 
   // Feature 4: Modal confirm handler
   async function handleModalConfirm(title: string, startTime: string, endTime: string, category: ScheduleCategory) {
-    const today = new Date().toISOString().split('T')[0];
+    const today = todayISO();
     await scheduleService.create({ date: today, startTime, endTime: endTime || undefined, title, category });
     const refreshed = await scheduleService.getByDate(today);
     setSchedule(refreshed);
@@ -483,7 +460,7 @@ export default function HomePage() {
       if (!jsonMatch) throw new Error('JSON 파싱 실패');
 
       const suggestions: AiScheduleSuggestion[] = JSON.parse(jsonMatch[0]);
-      const today_date = new Date().toISOString().split('T')[0];
+      const today_date = todayISO();
 
       for (const item of suggestions) {
         const validCategories: ScheduleCategory[] = ['Meeting', 'Work', 'CodeReview', 'Rest', 'Personal', 'Other'];

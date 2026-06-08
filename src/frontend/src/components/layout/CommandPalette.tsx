@@ -4,6 +4,7 @@ import { memoryService, type MemoryItem } from '../../services/memoryService';
 import { noteService, type NoteItem } from '../../services/noteService';
 import { todoService, type TodoItem } from '../../services/todoService';
 import { scheduleService, type ScheduleItem } from '../../services/scheduleService';
+import { todayISO } from '../../utils/time';
 
 type ResultType = 'memory' | 'note' | 'todo' | 'schedule' | 'page';
 
@@ -87,7 +88,7 @@ export default function CommandPalette({ open, onClose, onNavigate }: CommandPal
     setActiveIndex(0);
     const t = setTimeout(() => inputRef.current?.focus(), 30);
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = todayISO();
     Promise.all([
       memoryService.list().catch(() => [] as MemoryItem[]),
       noteService.list(50).catch(() => [] as NoteItem[]),
