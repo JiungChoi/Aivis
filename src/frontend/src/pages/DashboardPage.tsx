@@ -1,12 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { userService, type UserProfile } from '../services/userService';
 import { scheduleService, type ScheduleItem, type ScheduleCategory } from '../services/scheduleService';
-import { newsService, type NewsItem } from '../services/newsService';
-import { weatherService, type WeatherData, CITIES } from '../services/weatherService';
-import { noteService, type NoteItem } from '../services/noteService';
+import { CITIES } from '../services/weatherService';
 import { obsidianService, type ObsidianSettings } from '../services/obsidianService';
 import { conversationService } from '../services/conversationService';
-import { suggestionService, type SuggestionItem } from '../services/suggestionService';
 
 // ── AI 일정 추천 응답 타입 ───────────────────────────────────
 interface AiScheduleSuggestion {
@@ -23,6 +20,7 @@ import { ResizeHandle } from '../components/dashboard/ResizeHandle';
 import { SLOT_H, CATEGORY_BG, TAG_COLORS, type NewsTab, NEWS_TABS } from '../components/dashboard/dashboardConstants';
 import { toMins, minsToTimeStr, todayISO } from '../utils/time';
 import { greeting, dateStr } from '../utils/format';
+import { useNowMinutes, useNews, useWeather, useNotes, useSuggestions } from '../hooks/useDashboard';
 
 // ── 메인 컴포넌트 ─────────────────────────────────────────────
 export default function HomePage() {
@@ -30,21 +28,10 @@ export default function HomePage() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
   const [scheduleError, setScheduleError] = useState(false);
-  const [news, setNews] = useState<NewsItem[]>([]);
-  const [suggestions, setSuggestions] = useState<SuggestionItem[]>([]);
-  const [suggestionsError, setSuggestionsError] = useState(false);
-  const [suggestionsLoading, setSuggestionsLoading] = useState(true);
-  const [notesError, setNotesError] = useState(false);
-  const [nowMinutes, setNowMinutes] = useState(() => {
-    const d = new Date(); return d.getHours() * 60 + d.getMinutes();
-  });
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const d = new Date(); setNowMinutes(d.getHours() * 60 + d.getMinutes());
-    }, 60_000);
-    return () => clearInterval(timer);
-  }, []);
+  const nowMinutes = useNowMinutes();
+  const news = useNews(newsTab);
+  const { suggestions, setSuggestions, suggestionsError, suggestionsLoading, loadSuggestions } = useSuggestions();
 
   // Load today's schedule
   const loadSchedule = () => {
@@ -54,42 +41,11 @@ export default function HomePage() {
   };
   useEffect(loadSchedule, []);
 
-  // Load news whenever tab changes
-  useEffect(() => {
-    newsService.getByCategory(newsTab).then(setNews).catch(console.error);
-  }, [newsTab]);
-
-  // Load AI suggestions on mount
-  const loadSuggestions = () => {
-    setSuggestionsLoading(true);
-    setSuggestionsError(false);
-    suggestionService.get()
-      .then(data => { setSuggestions(data); setSuggestionsLoading(false); })
-      .catch(() => { setSuggestionsError(true); setSuggestionsLoading(false); });
-  };
-  useEffect(loadSuggestions, []);
-
-  // 컬럼 너비: [일정, 시간분석·작업제안] — 뉴스는 flex-1로 나머지 채움
-  // Schedule add form state
-  const [weather, setWeather] = useState<WeatherData | null>(null);
-  const [selectedCityKey, setSelectedCityKey] = useState(() => weatherService.getSelectedCityKey());
-  const [showCityPicker, setShowCityPicker] = useState(false);
-
-  useEffect(() => {
-    weatherService.getCurrent(selectedCityKey).then(setWeather).catch(console.error);
-  }, [selectedCityKey]);
-
-  function selectCity(key: string) {
-    weatherService.setSelectedCityKey(key);
-    setSelectedCityKey(key);
-    setShowCityPicker(false);
-    setWeather(null);
-  }
+  const { weather, selectedCityKey, showCityPicker, setShowCityPicker, citySearch, setCitySearch, selectCity } = useWeather();
 
   // Time state for pre-filling the modal
   const [newStartTime, setNewStartTime] = useState('09:00');
   const [newEndTime, setNewEndTime] = useState('10:00');
-  const [citySearch, setCitySearch] = useState('');
   const resizingRef = useRef<{
     id: string; startY: number; origEndMins: number; currentEndMins: number;
     date: string; startTime: string; title: string; category: ScheduleCategory; description?: string;
@@ -132,17 +88,8 @@ export default function HomePage() {
     }
   }
 
-  // Notes state
-  const [notes, setNotes] = useState<NoteItem[]>([]);
-  const [noteSearch, setNoteSearch] = useState('');
-
-  useEffect(() => {
-    setNotesError(false);
-    const req = noteSearch.trim()
-      ? noteService.search(noteSearch)
-      : noteService.list(5);
-    req.then(setNotes).catch(() => setNotesError(true));
-  }, [noteSearch]);
+  // Notes (search + recent)
+  const { notes, noteSearch, setNoteSearch, notesError } = useNotes();
 
   // Handle drag-and-drop onto the timeline (suggestion → new item, or schedule item → new time)
   function handleTimelineDragOver(e: React.DragEvent) {
