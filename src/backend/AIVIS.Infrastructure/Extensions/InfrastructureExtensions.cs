@@ -67,9 +67,6 @@ public static class InfrastructureExtensions
                     .SetHandlerLifetime(TimeSpan.FromMinutes(10));
         }
 
-        services.AddHttpClient<IClaudeService, ClaudeService>()
-                .AddHttpMessageHandler<ClaudeMessageHandler>();
-
         services.Configure<WhisperConfig>(configuration.GetSection(WhisperConfig.Section));
         services.Configure<TtsConfig>(configuration.GetSection(TtsConfig.Section));
         services.AddHttpClient<IWhisperService, WhisperHttpService>();
