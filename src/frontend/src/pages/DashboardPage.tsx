@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { userService, type UserProfile } from '../services/userService';
 import { scheduleService, type ScheduleItem, type ScheduleCategory } from '../services/scheduleService';
 import { CITIES } from '../services/weatherService';
-import { obsidianService, type ObsidianSettings } from '../services/obsidianService';
 import { conversationService } from '../services/conversationService';
 
 // ── AI 일정 추천 응답 타입 ───────────────────────────────────
@@ -17,7 +16,9 @@ import { SuggestionsPanel } from '../components/dashboard/SuggestionsPanel';
 import { NotesPanel } from '../components/dashboard/NotesPanel';
 import { AddEventModal } from '../components/dashboard/AddEventModal';
 import { ResizeHandle } from '../components/dashboard/ResizeHandle';
-import { SLOT_H, CATEGORY_BG, TAG_COLORS, type NewsTab, NEWS_TABS } from '../components/dashboard/dashboardConstants';
+import { ObsidianButton } from '../components/dashboard/ObsidianButton';
+import { NewsColumn } from '../components/dashboard/NewsColumn';
+import { SLOT_H, CATEGORY_BG, type NewsTab } from '../components/dashboard/dashboardConstants';
 import { toMins, minsToTimeStr, todayISO } from '../utils/time';
 import { greeting, dateStr } from '../utils/format';
 import { useNowMinutes, useNews, useWeather, useNotes, useSuggestions } from '../hooks/useDashboard';
@@ -243,41 +244,6 @@ export default function HomePage() {
     }
   }
 
-  // Obsidian settings modal
-  const [showObsidianModal, setShowObsidianModal] = useState(false);
-  const [obsidianSettings, setObsidianSettings] = useState<ObsidianSettings | null>(null);
-  const [obsidianVaultInput, setObsidianVaultInput] = useState('');
-  const [obsidianEnabled, setObsidianEnabled] = useState(false);
-  const [obsidianSyncing, setObsidianSyncing] = useState(false);
-  const [obsidianSyncMsg, setObsidianSyncMsg] = useState('');
-
-  useEffect(() => {
-    obsidianService.getSettings().then((s) => {
-      setObsidianSettings(s);
-      setObsidianVaultInput(s.vaultPath);
-      setObsidianEnabled(s.isEnabled);
-    }).catch(console.error);
-  }, []);
-
-  async function handleObsidianSave() {
-    try {
-      const updated = await obsidianService.updateSettings(obsidianVaultInput, obsidianEnabled);
-      setObsidianSettings(updated);
-      setObsidianSyncMsg('설정 저장 완료');
-      setTimeout(() => setObsidianSyncMsg(''), 2000);
-    } catch { setObsidianSyncMsg('저장 실패'); }
-  }
-
-  async function handleObsidianSync() {
-    setObsidianSyncing(true);
-    setObsidianSyncMsg('');
-    try {
-      const result = await obsidianService.syncAll();
-      setObsidianSyncMsg(`${result.syncedCount}개 노트 동기화 완료`);
-    } catch { setObsidianSyncMsg('동기화 실패'); }
-    finally { setObsidianSyncing(false); }
-  }
-
   const [col1, setCol1] = useState(250);
   const [col2, setCol2] = useState(250);
   const dragging = useRef<null | { handle: number; startX: number; startA: number }>(null);
@@ -437,19 +403,7 @@ export default function HomePage() {
           <div style={{ color: 'rgba(235,235,245,0.3)', fontSize: 11, marginTop: 2, letterSpacing: '-0.01em' }}>{dateStr()}</div>
         </div>
         <div className="flex items-center gap-3 relative">
-          {/* Obsidian 설정 버튼 */}
-          <button
-            onClick={() => setShowObsidianModal(true)}
-            title="Obsidian 연동 설정"
-            className={`text-xs transition-colors flex items-center gap-1 ${
-              obsidianSettings?.isEnabled ? 'text-emerald-400 hover:text-emerald-300' : 'text-gray-600 hover:text-gray-400'
-            }`}
-          >
-            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12.5 2C9.8 2 7.4 3.6 6.3 6c-.3.7-.5 1.5-.5 2.3 0 .9.2 1.8.6 2.6L2 20h4l2-4h2l1 4h2l1-4h2l2 4h4l-4.4-9.1c.4-.8.6-1.7.6-2.6 0-.8-.2-1.6-.5-2.3C17.6 3.6 15.2 2 12.5 2zm0 2c1.9 0 3.5 1.6 3.5 3.5S14.4 11 12.5 11 9 9.4 9 7.5 10.6 4 12.5 4z"/>
-            </svg>
-            Obsidian
-          </button>
+          <ObsidianButton />
           <button
             onClick={() => setShowCityPicker((v) => !v)}
             className="text-gray-500 text-xs hover:text-gray-300 transition-colors flex items-center gap-1"
@@ -881,97 +835,7 @@ export default function HomePage() {
         <ResizeHandle onMouseDown={(e) => startResize(1, e)} />
 
         {/* ── COL 3: 뉴스 ── */}
-        <div className="flex-col overflow-hidden" style={{ flex: '1 1 0', minWidth: 160, display: 'flex', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
-          {/* 제목 */}
-          <div className="flex-shrink-0 px-4 pt-4 pb-2">
-            <span style={{
-              color: 'rgba(235,235,245,0.92)',
-              fontWeight: 700,
-              fontSize: 16,
-              letterSpacing: '-0.01em',
-              fontFamily: 'system-ui, -apple-system, sans-serif',
-            }}>뉴스</span>
-          </div>
-          {/* 탭 (언더라인 스타일) */}
-          <div className="flex-shrink-0 px-4 flex gap-1 overflow-x-auto"
-            style={{ borderBottom: '1px solid rgba(84,84,88,0.25)' }}>
-            {NEWS_TABS.map((tab) => (
-              <button key={tab} onClick={() => setNewsTab(tab)}
-                className="flex-shrink-0 text-[11px] pb-2 pt-0.5 transition-colors relative"
-                style={{
-                  color: newsTab === tab ? '#64b5ff' : 'rgba(235,235,245,0.4)',
-                  fontWeight: newsTab === tab ? 600 : 400,
-                }}
-                onMouseEnter={(e) => { if (newsTab !== tab) (e.currentTarget as HTMLElement).style.color = 'rgba(235,235,245,0.7)'; }}
-                onMouseLeave={(e) => { if (newsTab !== tab) (e.currentTarget as HTMLElement).style.color = 'rgba(235,235,245,0.4)'; }}
-              >
-                {tab}
-                {newsTab === tab && (
-                  <span style={{
-                    position: 'absolute', left: 0, right: 0, bottom: -1, height: 2,
-                    borderRadius: 2, background: '#0a84ff', boxShadow: '0 0 6px rgba(10,132,255,0.5)',
-                  }} />
-                )}
-              </button>
-            ))}
-          </div>
-          <div className="flex-1 overflow-y-auto p-4 space-y-2">
-            {news.length === 0 ? (
-              <div className="text-gray-600 text-[11px] text-center py-8">뉴스를 불러오는 중...</div>
-            ) : (
-              news.map((item, i) => (
-                <a
-                  key={i}
-                  href={item.url ?? '#'}
-                  target={item.url ? '_blank' : undefined}
-                  rel={item.url ? 'noopener noreferrer' : undefined}
-                  className="block rounded-lg px-3 py-2 cursor-pointer group"
-                  style={{
-                    background: 'rgba(28,28,30,0.6)',
-                    backdropFilter: 'blur(8px)',
-                    WebkitBackdropFilter: 'blur(8px)',
-                    border: '1px solid rgba(255,255,255,0.05)',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
-                    transition: 'transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease',
-                  }}
-                  onMouseEnter={e => {
-                    const el = e.currentTarget as HTMLElement;
-                    el.style.borderColor = 'rgba(255,255,255,0.05)';
-                    el.style.borderLeftColor = '#0a84ff';
-                    el.style.borderLeftWidth = '2px';
-                    el.style.boxShadow = '0 2px 12px rgba(0,0,0,0.35)';
-                  }}
-                  onMouseLeave={e => {
-                    const el = e.currentTarget as HTMLElement;
-                    el.style.borderColor = 'rgba(255,255,255,0.05)';
-                    el.style.borderLeftWidth = '1px';
-                    el.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
-                  }}
-                >
-                  <div className="flex items-start gap-2.5">
-                    <span className={`flex-shrink-0 text-[9px] px-1.5 py-0.5 rounded mt-0.5 ${TAG_COLORS[item.tag] ?? 'bg-gray-500/20 text-gray-400'}`}>
-                      {item.tag}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-gray-200 text-xs leading-snug group-hover:text-white transition-colors line-clamp-2">
-                        {item.title}
-                      </div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-gray-600 text-[10px]">{item.source}</span>
-                        {item.time && (
-                          <>
-                            <span className="text-gray-800 text-[10px]">·</span>
-                            <span className="text-gray-600 text-[10px]">{item.time} 전</span>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </a>
-              ))
-            )}
-          </div>
-        </div>
+        <NewsColumn news={news} newsTab={newsTab} onSelectTab={setNewsTab} />
 
       </div>
 
@@ -985,74 +849,6 @@ export default function HomePage() {
         />
       )}
 
-      {/* ── Obsidian 설정 모달 ── */}
-      {showObsidianModal && (
-        <>
-          <div className="fixed inset-0 z-50 bg-black/60" onClick={() => setShowObsidianModal(false)} />
-          <div className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl p-5 w-80"
-            style={{ background: '#1c1c1e', border: '1px solid #1e3a5a', boxShadow: '0 20px 60px rgba(0,0,0,0.6)' }}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <span className="text-white font-semibold text-sm">Obsidian 연동</span>
-                <span className={`text-[9px] px-1.5 py-0.5 rounded ${obsidianSettings?.isEnabled ? 'bg-emerald-500/20 text-emerald-400' : 'bg-gray-500/20 text-gray-500'}`}>
-                  {obsidianSettings?.isEnabled ? '연결됨' : '꺼짐'}
-                </span>
-              </div>
-              <button onClick={() => setShowObsidianModal(false)} className="text-gray-600 hover:text-gray-300 text-lg leading-none">✕</button>
-            </div>
-
-            <div className="space-y-3">
-              {/* 활성화 토글 */}
-              <div className="flex items-center justify-between">
-                <span className="text-gray-400 text-xs">연동 활성화</span>
-                <button
-                  onClick={() => setObsidianEnabled((v) => !v)}
-                  className={`w-10 h-5 rounded-full transition-colors relative ${obsidianEnabled ? 'bg-emerald-500' : 'bg-gray-700'}`}
-                >
-                  <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform ${obsidianEnabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
-                </button>
-              </div>
-
-              {/* Vault 경로 */}
-              <div>
-                <label className="text-gray-500 text-[10px] mb-1 block">Vault 경로 (컨테이너 내부)</label>
-                <input
-                  type="text"
-                  value={obsidianVaultInput}
-                  onChange={(e) => setObsidianVaultInput(e.target.value)}
-                  placeholder="/vault"
-                  className="w-full rounded-lg text-[11px] px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 placeholder-gray-700"
-                  style={{ background: '#1c1c1e', border: '1px solid rgba(84,84,88,0.35)', color: '#d1d5db' }}
-                />
-                <p className="text-gray-700 text-[9px] mt-1">
-                  호스트 ~/Documents/AIVIS → 컨테이너 /vault 마운트됨
-                </p>
-              </div>
-
-              {/* 버튼들 */}
-              <div className="flex gap-2 pt-1">
-                <button
-                  onClick={handleObsidianSave}
-                  className="flex-1 text-[11px] py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition-colors"
-                >
-                  저장
-                </button>
-                <button
-                  onClick={handleObsidianSync}
-                  disabled={!obsidianSettings?.isEnabled || obsidianSyncing}
-                  className="flex-1 text-[11px] py-1.5 rounded-lg bg-blue-600/70 hover:bg-blue-500/70 disabled:opacity-30 text-white transition-colors"
-                >
-                  {obsidianSyncing ? '동기화 중...' : '전체 동기화'}
-                </button>
-              </div>
-
-              {obsidianSyncMsg && (
-                <p className="text-emerald-400 text-[10px] text-center">{obsidianSyncMsg}</p>
-              )}
-            </div>
-          </div>
-        </>
-      )}
     </div>
   );
 }
