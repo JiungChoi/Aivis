@@ -1,14 +1,6 @@
-import type { ScheduleItem } from '../../services/scheduleService';
+import type { ScheduleItem, ScheduleCategory } from '../../services/scheduleService';
 import { toMins } from '../../utils/time';
-
-const CATEGORY_CHART_META: Record<string, { label: string; color: string }> = {
-  Work:       { label: '집중 작업', color: '#3b82f6' },
-  Meeting:    { label: '미팅',     color: '#8b5cf6' },
-  CodeReview: { label: '코드리뷰', color: '#10b981' },
-  Rest:       { label: '휴식',     color: '#374151' },
-  Personal:   { label: '개인',     color: '#f59e0b' },
-  Other:      { label: '기타',     color: '#6b7280' },
-};
+import { CATEGORY_META } from '../../theme/categories';
 
 interface ChartSegment { label: string; pct: number; color: string; hours: string; }
 
@@ -67,12 +59,15 @@ function buildChartData(schedule: ScheduleItem[]) {
   });
   const totalMins = Object.values(durations).reduce((a, b) => a + b, 0);
   const totalHours = `${(totalMins / 60).toFixed(1)}h`;
-  const segments: ChartSegment[] = Object.entries(durations).map(([cat, mins]) => ({
-    label: CATEGORY_CHART_META[cat]?.label ?? cat,
-    pct: Math.round((mins / totalMins) * 100),
-    color: CATEGORY_CHART_META[cat]?.color ?? '#6b7280',
-    hours: `${(mins / 60).toFixed(1)}h`,
-  }));
+  const segments: ChartSegment[] = Object.entries(durations).map(([cat, mins]) => {
+    const meta = CATEGORY_META[cat as ScheduleCategory];
+    return {
+      label: meta?.chartLabel ?? cat,
+      pct: Math.round((mins / totalMins) * 100),
+      color: meta?.chartColor ?? '#6b7280',
+      hours: `${(mins / 60).toFixed(1)}h`,
+    };
+  });
   return {
     segments,
     totalHours,
