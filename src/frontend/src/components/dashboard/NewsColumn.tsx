@@ -21,11 +21,11 @@ export function NewsColumn({ news, newsTab, onSelectTab }: NewsColumnProps) {
         }}>뉴스</span>
       </div>
       {/* 탭 (언더라인 스타일) */}
-      <div className="flex-shrink-0 px-4 flex gap-1 overflow-x-auto"
+      <div className="flex-shrink-0 px-4 flex gap-5 overflow-x-auto"
         style={{ borderBottom: '1px solid rgba(84,84,88,0.25)' }}>
         {NEWS_TABS.map((tab) => (
           <button key={tab} onClick={() => onSelectTab(tab)}
-            className="flex-shrink-0 text-[11px] pb-2 pt-0.5 transition-colors relative"
+            className="flex-shrink-0 text-[11px] px-0.5 pb-2 pt-0.5 transition-colors relative"
             style={{
               color: newsTab === tab ? '#64b5ff' : 'rgba(235,235,245,0.4)',
               fontWeight: newsTab === tab ? 600 : 400,
