@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { scheduleService, type ScheduleItem, type ScheduleCategory } from '../../services/scheduleService';
 import { conversationService } from '../../services/conversationService';
-import { SLOT_H, CATEGORY_BG } from './dashboardConstants';
+import { SLOT_H } from './dashboardConstants';
+import { categoryBlock } from '../../theme/categories';
 import { toMins, minsToTimeStr, todayISO } from '../../utils/time';
 
 interface AiScheduleSuggestion {
@@ -386,7 +387,7 @@ export function ScheduleTimeline({
           const durationMins = Math.max(30, endMins - startMins);
           const topPx = minsToTop(startMins) + 1;
           const heightPx = Math.max(SLOT_H - 2, minsToTop(durationMins) - 2);
-          const colors = CATEGORY_BG[item.category] ?? CATEGORY_BG.Other;
+          const colors = categoryBlock(item.category);
           return (
             <div
               key={item.id}
