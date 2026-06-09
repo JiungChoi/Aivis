@@ -116,7 +116,19 @@ Electron Frontend
 
 ## 환경 설정
 
-`AIVIS.Infrastructure/Environments/.env` 파일에 전체 환경변수를 관리합니다.  
+### 최초 셋업 (클론 후 필수)
+`.env` 파일은 비밀값을 담을 수 있어 **git 에 추적되지 않습니다**(`.gitignore`). 각 Phase 폴더의 `.env.example` 을 복사해 `.env` 를 만들고 값을 채우세요.
+
+```bash
+cd AIVIS.Infrastructure/Environments
+cp Phase1/.env.example Phase1/.env   # 기본 실행에 필요 (Program.cs 가 Phase1/.env 로드)
+# 필요 시 Phase2 / Phase3 도 동일하게
+```
+
+채워야 할 값: `DATABASE__CONNECTIONSTRING` 의 비밀번호, (Claude 사용 시) `ANTHROPIC__APIKEY`, `OBSIDIAN__VAULTPATH` 등.
+⚠️ 실제 `.env` 에는 API 키/DB 비밀번호가 들어가므로 절대 커밋하지 마세요.
+
+### 변수 규칙
 `__` (더블 언더스코어)는 IConfiguration의 `:` 계층 구분자로 자동 변환됩니다.
 
 ```
