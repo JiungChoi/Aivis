@@ -1,0 +1,40 @@
+name: CI
+
+# git-flow 규칙 "머지 전 빌드/타입체크 통과"를 자동 강제한다.
+# develop/main 으로의 PR 과 develop push 에서 프론트/백엔드 빌드를 검증.
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [develop]
+
+jobs:
+  frontend:
+    name: Frontend (tsc + vite build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: src/frontend/package-lock.json
+      - run: npm ci
+      - run: npm run build
+
+  backend:
+    name: Backend (dotnet build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet restore AIVIS.sln
+      - run: dotnet build AIVIS.sln --no-restore -c Release
