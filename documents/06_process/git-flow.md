@@ -112,7 +112,7 @@ Co-Authored-By: ...   # AI 협업 시
 1. **`main` 직접 커밋·push 금지.** 오직 release/hotfix 머지로만 갱신.
 2. **`develop` 에 직접 작업 금지.** 항상 `feature/*` 에서 작업 후 `--no-ff` 머지.
 3. **비밀키 커밋 금지.** `Environments/**/.env`, API 키, DB 비밀번호는 절대 스테이징하지 않는다. (`.gitignore` 로 차단됨 — 우회 금지)
-4. **머지 전 빌드/타입체크 통과 필수.** 프론트 `npm run build`(tsc 포함), 백엔드 `dotnet build`.
+4. **머지 전 빌드/타입체크 통과 필수.** 프론트 `npm run build`(tsc 포함), 백엔드 `dotnet build`. → main/develop PR·develop push 시 **GitHub Actions CI**(`.github/workflows/ci.yml`)가 자동 검증한다.
 5. **기능 브랜치는 머지 후 삭제.**
 6. `--no-ff` 로 머지해 히스토리에 기능 경계를 남긴다.
 
