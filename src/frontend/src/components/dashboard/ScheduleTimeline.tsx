@@ -257,7 +257,9 @@ export function ScheduleTimeline({
     <div
       ref={col1Ref}
       className="overflow-y-auto flex-shrink-0"
-      style={{ width, borderRight: '1px solid rgba(255,255,255,0.05)', position: 'relative' }}
+      // height:100% + minHeight:0 ties the column to the row height so the 24h
+      // timeline (1344px) scrolls internally instead of overflowing & being clipped.
+      style={{ width, height: '100%', minHeight: 0, borderRight: '1px solid rgba(255,255,255,0.05)', position: 'relative' }}
     >
       {/* Sticky header */}
       <div style={{

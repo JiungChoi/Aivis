@@ -310,7 +310,8 @@ export default function HomePage() {
       })()}
 
       {/* ── 4컬럼 바디: 일정 | 시간분석·작업제안 | 뉴스 | 채팅 ── */}
-      <div className="flex-1 flex overflow-hidden" style={{ userSelect: dragging.current ? 'none' : 'auto' }}>
+      {/* min-h-0: 자식(타임라인 1344px)이 행을 늘리지 않고 행 안에서 스크롤되게 함 */}
+      <div className="flex-1 flex overflow-hidden min-h-0" style={{ userSelect: dragging.current ? 'none' : 'auto' }}>
 
         {/* ── COL 1: 오늘의 일정 (24h Timeline) ── */}
         <ScheduleTimeline
