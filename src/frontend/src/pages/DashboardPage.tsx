@@ -15,6 +15,7 @@ import { type NewsTab } from '../components/dashboard/dashboardConstants';
 import { toMins, minsToTimeStr, todayISO } from '../utils/time';
 import { greeting, dateStr } from '../utils/format';
 import { useNowMinutes, useNews, useWeather, useNotes, useSuggestions } from '../hooks/useDashboard';
+import { toast } from '../stores/toastStore';
 
 // ── 메인 컴포넌트 ─────────────────────────────────────────────
 export default function HomePage() {
@@ -81,6 +82,7 @@ export default function HomePage() {
     await scheduleService.create({ date: today, startTime, endTime, title, category: 'Work' });
     const refreshed = await scheduleService.getByDate(today);
     setSchedule(refreshed);
+    toast.success('제안을 일정에 추가했습니다');
 
     // Remove the added suggestion from the panel
     if (typeof index === 'number') {
@@ -95,6 +97,7 @@ export default function HomePage() {
     const refreshed = await scheduleService.getByDate(today);
     setSchedule(refreshed);
     setShowModal(false);
+    toast.success('일정을 추가했습니다');
   }
 
   const [col1, setCol1] = useState(250);

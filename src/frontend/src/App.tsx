@@ -10,6 +10,7 @@ import NotesPage from './pages/NotesPage';
 import CharacterLayer from './components/characters/CharacterLayer';
 import GlobalChatPanel from './components/layout/GlobalChatPanel';
 import CommandPalette from './components/layout/CommandPalette';
+import { ToastContainer } from './components/ui/ToastContainer';
 import { useConversationStore } from './stores/conversationStore';
 import { useScheduleReminder } from './hooks/useScheduleReminder';
 import { userService } from './services/userService';
@@ -57,6 +58,7 @@ export default function App() {
         onClose={() => setPaletteOpen(false)}
         onNavigate={setCurrentPage}
       />
+      <ToastContainer />
     </div>
   );
 }

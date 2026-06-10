@@ -4,6 +4,7 @@ import { conversationService } from '../../services/conversationService';
 import { SLOT_H } from './dashboardConstants';
 import { categoryBlock } from '../../theme/categories';
 import { toMins, minsToTimeStr, todayISO } from '../../utils/time';
+import { toast } from '../../stores/toastStore';
 
 interface AiScheduleSuggestion {
   title: string;
@@ -69,8 +70,10 @@ export function ScheduleTimeline({
     setSchedule(prev => prev.filter(s => s.id !== id));
     try {
       await scheduleService.remove(id);
+      toast.success('일정을 삭제했습니다');
     } catch {
       setSchedule(await scheduleService.getByDate(item.date));
+      toast.error('삭제하지 못해 되돌렸습니다');
     }
   }
 
@@ -100,6 +103,7 @@ export function ScheduleTimeline({
       });
       setSchedule(await scheduleService.getByDate(today));
       removeSuggestion(index);
+      toast.success('일정을 추가했습니다');
       return;
     }
 
@@ -121,6 +125,7 @@ export function ScheduleTimeline({
         description: item.description,
       });
       setSchedule(await scheduleService.getByDate(item.date));
+      toast.success('일정을 옮겼습니다');
     }
   }
 
@@ -166,11 +171,13 @@ export function ScheduleTimeline({
 
       const refreshed = await scheduleService.getByDate(today_date);
       setSchedule(refreshed);
+      toast.success(`AI가 일정 ${suggestions.length}개를 추가했습니다`);
 
       // Clean up temp session
       await conversationService.deleteSession(session.id);
     } catch (err) {
       console.error('AI 일정 추천 실패:', err);
+      toast.error('AI 일정 추천에 실패했습니다');
     } finally {
       setAiScheduleLoading(false);
     }
