@@ -1,5 +1,4 @@
 using System.Text.Json;
-using AIVIS.Application.Controllers;
 using AIVIS.Application.Services;
 using AIVIS.Domain.Models.Agent;
 using AIVIS.Domain.Models.Entities;
@@ -18,7 +17,7 @@ public static class ConversationStreamHandler
         ISessionRepository sessionRepository,
         IMessageRepository messageRepository,
         AgentOrchestrator agentOrchestrator,
-        ConversationQualityController qualityController,
+        ConversationContextBuilder contextBuilder,
         CancellationToken ct)
     {
         var session = await sessionRepository.GetByIdWithMessagesAsync(sessionId, ct);
@@ -47,7 +46,7 @@ public static class ConversationStreamHandler
         }
 
         var dbHistory = session.Messages.Append(userMessage).ToList();
-        var chatHistory = await qualityController.PrepareHistoryAsync(session.UserId, dbHistory, ct);
+        var chatHistory = await contextBuilder.PrepareHistoryAsync(session.UserId, dbHistory, ct);
 
         context.Response.ContentType = "text/event-stream";
         context.Response.Headers.CacheControl = "no-cache";
