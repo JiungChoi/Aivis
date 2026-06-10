@@ -13,6 +13,54 @@ interface AiScheduleSuggestion {
   category: ScheduleCategory;
 }
 
+function eventEndMins(item: ScheduleItem) {
+  return item.endTime ? toMins(item.endTime) : toMins(item.startTime) + 60;
+}
+
+/**
+ * Calendar-style overlap layout: groups time-overlapping events into clusters
+ * and assigns each a column so concurrent events render side-by-side.
+ * Returns id → { col, cols } where width = 1/cols and left offset = col/cols.
+ */
+function computeOverlapLayout(items: ScheduleItem[]): Map<string, { col: number; cols: number }> {
+  const layout = new Map<string, { col: number; cols: number }>();
+  const sorted = [...items].sort(
+    (a, b) => toMins(a.startTime) - toMins(b.startTime) || eventEndMins(a) - eventEndMins(b),
+  );
+
+  let cluster: ScheduleItem[] = [];
+  let clusterEnd = -1;
+
+  const flush = () => {
+    if (cluster.length === 0) return;
+    const colEnds: number[] = []; // running end-time of each column
+    for (const ev of cluster) {
+      const s = toMins(ev.startTime);
+      let col = colEnds.findIndex((end) => s >= end);
+      if (col === -1) { col = colEnds.length; colEnds.push(0); }
+      colEnds[col] = eventEndMins(ev);
+      layout.set(ev.id, { col, cols: 0 }); // cols filled after cluster size known
+    }
+    const cols = colEnds.length;
+    for (const ev of cluster) {
+      const entry = layout.get(ev.id)!;
+      entry.cols = cols;
+    }
+    cluster = [];
+    clusterEnd = -1;
+  };
+
+  for (const ev of sorted) {
+    const s = toMins(ev.startTime);
+    if (cluster.length > 0 && s >= clusterEnd) flush();
+    cluster.push(ev);
+    clusterEnd = Math.max(clusterEnd, eventEndMins(ev));
+  }
+  flush();
+
+  return layout;
+}
+
 interface ScheduleTimelineProps {
   width: number;
   schedule: ScheduleItem[];
@@ -260,6 +308,8 @@ export function ScheduleTimeline({
     document.addEventListener('mouseup', onUp);
   }
 
+  const eventLayout = computeOverlapLayout(schedule);
+
   return (
     <div
       ref={col1Ref}
@@ -397,6 +447,11 @@ export function ScheduleTimeline({
           const topPx = minsToTop(startMins) + 1;
           const heightPx = Math.max(SLOT_H - 2, minsToTop(durationMins) - 2);
           const colors = categoryBlock(item.category);
+          // Side-by-side layout for overlapping events (band spans left:30 → right:4)
+          const { col, cols } = eventLayout.get(item.id) ?? { col: 0, cols: 1 };
+          const colWidth = `((100% - 34px) / ${cols})`;
+          const leftCalc = `calc(30px + ${col} * ${colWidth})`;
+          const widthCalc = `calc(${colWidth} - ${cols > 1 ? 3 : 4}px)`;
           return (
             <div
               key={item.id}
@@ -411,7 +466,7 @@ export function ScheduleTimeline({
               onClick={(e) => e.stopPropagation()}
               style={{
                 position: 'absolute',
-                top: topPx, left: 30, right: 4, height: heightPx,
+                top: topPx, left: leftCalc, width: widthCalc, height: heightPx,
                 borderRadius: 8,
                 background: colors.bg,
                 border: `1px solid ${colors.border}`,
