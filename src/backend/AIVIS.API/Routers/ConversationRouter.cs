@@ -1,7 +1,14 @@
 using System.Text;
 using AIVIS.API.Handlers;
+using AIVIS.Application.Constants;
+using AIVIS.Application.Mappers;
+using AIVIS.Application.Services;
+using AIVIS.Domain.Models.Agent;
 using AIVIS.Domain.Models.Common;
 using AIVIS.Domain.Enums;
+using AIVIS.Domain.Models.Entities;
+using AIVIS.Domain.Models.Requests;
+using AIVIS.Domain.Models.Responses;
 using AIVIS.Domain.Repositories;
 using AIVIS.Domain.Services;
 
@@ -11,10 +18,95 @@ public static class ConversationRouter
 {
     public static IEndpointRouteBuilder MapConversationRoutes(this IEndpointRouteBuilder app)
     {
-        app.MapControllers();
+        // ── Sessions / messages (CRUD) ──────────────────────────
+        app.MapGet("/api/conversations", async (ISessionRepository sessionRepository, CancellationToken ct) =>
+        {
+            var sessions = await sessionRepository.ListAsync(ct);
+            return ApiResponse<IReadOnlyList<SessionResp>>.Ok(sessions.Select(s => s.ToResp()).ToList());
+        });
+
+        app.MapPost("/api/conversations", async (HttpRequest req, ISessionRepository sessionRepository, CancellationToken ct) =>
+        {
+            var userId = req.Headers.TryGetValue("X-User-Id", out var id) && !string.IsNullOrWhiteSpace(id)
+                ? id.ToString()
+                : ApplicationConstants.DefaultUserId;
+
+            var session = await sessionRepository.CreateAsync(new Session
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                Status = SessionStatus.Active,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            }, ct);
+
+            return ApiResponse<SessionResp>.Ok(session.ToResp());
+        });
+
+        app.MapGet("/api/conversations/{sessionId:guid}", async (Guid sessionId, ISessionRepository sessionRepository, CancellationToken ct) =>
+        {
+            var session = await sessionRepository.GetByIdWithMessagesAsync(sessionId, ct);
+            return session is null
+                ? ApiResponse<SessionResp>.Fail("NOT_FOUND", "Session not found")
+                : ApiResponse<SessionResp>.Ok(session.ToResp());
+        });
+
+        app.MapPost("/api/conversations/{sessionId:guid}/messages", async (
+            Guid sessionId,
+            SendMessageRequest request,
+            ISessionRepository sessionRepository,
+            IMessageRepository messageRepository,
+            ILlmService llmService,
+            ConversationContextBuilder contextBuilder,
+            CancellationToken ct) =>
+        {
+            var session = await sessionRepository.GetByIdWithMessagesAsync(sessionId, ct);
+            if (session is null)
+                return ApiResponse<MessageResp>.Fail("NOT_FOUND", "Session not found");
+
+            var userMessage = await messageRepository.CreateAsync(new Message
+            {
+                Id = Guid.NewGuid(),
+                SessionId = sessionId,
+                Role = MessageRole.User,
+                Content = request.Content,
+                CreatedAt = DateTime.UtcNow
+            }, ct);
+
+            var rawHistory = session.Messages.Append(userMessage).ToList();
+            var preparedHistory = await contextBuilder.PrepareHistoryAsync(session.UserId, rawHistory, ct);
+
+            var sb = new StringBuilder();
+            await foreach (var chunk in llmService.StreamAsync(preparedHistory, ct))
+            {
+                if (chunk is TextDelta d) sb.Append(d.Text);
+            }
+
+            var assistantMessage = await messageRepository.CreateAsync(new Message
+            {
+                Id = Guid.NewGuid(),
+                SessionId = sessionId,
+                Role = MessageRole.Assistant,
+                Content = sb.ToString(),
+                CreatedAt = DateTime.UtcNow
+            }, ct);
+
+            session.UpdatedAt = DateTime.UtcNow;
+            await sessionRepository.UpdateAsync(session, ct);
+
+            return ApiResponse<MessageResp>.Ok(assistantMessage.ToResp());
+        });
+
+        app.MapDelete("/api/conversations/{sessionId:guid}", async (Guid sessionId, ISessionRepository sessionRepository, CancellationToken ct) =>
+        {
+            await sessionRepository.DeleteAsync(sessionId, ct);
+            return ApiResponse.OkResult();
+        });
+
+        // ── Streaming (SSE) ─────────────────────────────────────
         app.MapPost("/api/conversations/{sessionId:guid}/messages/stream", ConversationStreamHandler.Handle);
 
-        // POST /api/conversations/{sessionId}/export — Obsidian Daily Note에 대화 저장
+        // ── Export to Obsidian Daily Note ───────────────────────
         app.MapPost("/api/conversations/{sessionId:guid}/export", async (
             Guid sessionId,
             IMessageRepository messageRepository,

@@ -5,9 +5,14 @@ using AIVIS.Domain.Enums;
 using AIVIS.Domain.Services;
 using AIVIS.Domain.Repositories;
 
-namespace AIVIS.Application.Controllers;
+namespace AIVIS.Application.Services;
 
-public class ConversationQualityController(
+/// <summary>
+/// Builds the LLM chat context (system prompt + sliding-window history) for a
+/// conversation. Previously named ConversationQualityController — it has no HTTP
+/// routes and is consumed as a service, so it lives in Services.
+/// </summary>
+public class ConversationContextBuilder(
     ConversationQualityService qualityService,
     IUserRepository userRepository,
     IMemoryRepository memoryRepository,

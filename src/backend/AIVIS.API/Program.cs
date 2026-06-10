@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using AIVIS.API.Routers;
 using AIVIS.Application.BackgroundServices;
 using AIVIS.Application.Extensions;
@@ -17,6 +18,11 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
           .AllowAnyMethod()));
 
 builder.Services.AddOpenApi();
+
+// Minimal API JSON: serialize enums as strings (프론트가 role/status/category 등을 문자열로 기대)
+builder.Services.ConfigureHttpJsonOptions(o =>
+    o.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddHostedService<MemoryConsolidationService>();
