@@ -401,3 +401,21 @@ input[type='time']::-webkit-calendar-picker-indicator { opacity: 0; }
 @keyframes analytics-dash {
   to { stroke-dashoffset: -20; }
 }
+
+/* ── Accessibility ────────────────────────────────────────── */
+/* Respect users who prefer reduced motion: neutralize animations/transitions. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Visible keyboard focus ring (does not affect mouse users). */
+:focus-visible {
+  outline: 2px solid rgba(54, 211, 255, 0.7);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
