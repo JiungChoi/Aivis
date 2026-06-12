@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ComponentType } from 'react';
 import NavBar, { type PageKey } from './components/layout/NavBar';
 import DashboardPage from './pages/DashboardPage';
 import SchedulePage from './pages/SchedulePage';
@@ -14,6 +14,17 @@ import { ToastContainer } from './components/ui/ToastContainer';
 import { useConversationStore } from './stores/conversationStore';
 import { useScheduleReminder } from './hooks/useScheduleReminder';
 import { userService } from './services/userService';
+
+// Single source of truth for page routing (add a page here + in NavBar's PageKey).
+const PAGES: Record<PageKey, ComponentType> = {
+  dashboard: DashboardPage,
+  schedule: SchedulePage,
+  memory: MemoryPage,
+  analytics: AnalyticsPage,
+  todo: TodoPage,
+  notes: NotesPage,
+  settings: SettingsPage,
+};
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<PageKey>('dashboard');
@@ -38,18 +49,14 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
+  const CurrentPage = PAGES[currentPage];
+
   return (
     <div className="flex h-screen text-white overflow-hidden" style={{ background: '#000000' }}>
       <NavBar currentPage={currentPage} onNavigate={setCurrentPage} />
       {/* Main content: relative so CharacterLayer can position absolutely inside */}
       <div className="flex-1 relative overflow-hidden">
-        {currentPage === 'dashboard' && <DashboardPage />}
-        {currentPage === 'schedule' && <SchedulePage />}
-        {currentPage === 'memory' && <MemoryPage />}
-        {currentPage === 'analytics' && <AnalyticsPage />}
-        {currentPage === 'todo' && <TodoPage />}
-        {currentPage === 'notes' && <NotesPage />}
-        {currentPage === 'settings' && <SettingsPage />}
+        <CurrentPage />
         <CharacterLayer />
       </div>
       <GlobalChatPanel />
