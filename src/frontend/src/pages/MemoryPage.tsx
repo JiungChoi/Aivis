@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { memoryService, type MemoryItem } from '../services/memoryService';
+import { toast } from '../stores/toastStore';
 
 const SOURCE_COLORS: Record<string, string> = {
   conversation: 'bg-blue-500/20 text-blue-400',
@@ -57,15 +58,23 @@ export default function MemoryPage() {
       const updated = await memoryService.upsert({ key: editKey.trim(), value: editValue.trim(), source: 'manual' });
       setMemories(prev => prev.map(m => m.key === editKey.trim() ? updated : m));
       setSelected(updated);
+      toast.success('기억을 저장했습니다');
+    } catch {
+      toast.error('기억을 저장하지 못했습니다');
     } finally {
       setSaving(false);
     }
   }
 
   async function handleDelete(id: string) {
-    await memoryService.remove(id);
-    setMemories(prev => prev.filter(m => m.id !== id));
-    if (selected?.id === id) setSelected(null);
+    try {
+      await memoryService.remove(id);
+      setMemories(prev => prev.filter(m => m.id !== id));
+      if (selected?.id === id) setSelected(null);
+      toast.success('기억을 삭제했습니다');
+    } catch {
+      toast.error('기억을 삭제하지 못했습니다');
+    }
   }
 
   async function handleAdd() {
@@ -88,6 +97,9 @@ export default function MemoryPage() {
       setSelected(created);
       setEditKey(created.key);
       setEditValue(created.value);
+      toast.success('기억을 추가했습니다');
+    } catch {
+      toast.error('기억을 추가하지 못했습니다');
     } finally {
       setSaving(false);
     }

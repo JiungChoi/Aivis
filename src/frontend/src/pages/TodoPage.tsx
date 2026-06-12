@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { todoService, type TodoItem, type TodoPriority } from '../services/todoService';
+import { toast } from '../stores/toastStore';
 
 const PRIORITY_LABELS: Record<TodoPriority, string> = {
   low: '낮음',
@@ -58,7 +59,8 @@ export default function TodoPage() {
       setTodos(prev => [created, ...prev]);
       setNewTitle(''); setNewDesc(''); setNewPriority('normal'); setNewDue('');
       setShowForm(false);
-    } catch { /* no-op */ }
+      toast.success('할 일을 추가했습니다');
+    } catch { toast.error('할 일을 추가하지 못했습니다'); }
     finally { setAdding(false); }
   }
 
@@ -66,14 +68,15 @@ export default function TodoPage() {
     try {
       const updated = await todoService.toggle(item);
       setTodos(prev => prev.map(t => t.id === updated.id ? updated : t));
-    } catch { /* no-op */ }
+    } catch { toast.error('상태를 변경하지 못했습니다'); }
   }
 
   async function handleDelete(id: string) {
     try {
       await todoService.remove(id);
       setTodos(prev => prev.filter(t => t.id !== id));
-    } catch { /* no-op */ }
+      toast.success('할 일을 삭제했습니다');
+    } catch { toast.error('할 일을 삭제하지 못했습니다'); }
   }
 
   const filtered = todos.filter(t => {
