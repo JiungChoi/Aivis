@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { noteService, type NoteItem } from '../services/noteService';
+import { toast } from '../stores/toastStore';
 
 const SOURCE_COLORS: Record<string, string> = {
   conversation: 'bg-blue-500/20 text-blue-400',
@@ -162,15 +163,23 @@ export default function NotesPage() {
       setNewTitle(''); setNewContent(''); setNewTags('');
       setShowAddForm(false);
       setSelected(created);
+      toast.success('노트를 저장했습니다');
+    } catch {
+      toast.error('노트를 저장하지 못했습니다');
     } finally {
       setSaving(false);
     }
   }
 
   async function handleDelete(id: string) {
-    await noteService.remove(id);
-    setNotes(prev => prev.filter(n => n.id !== id));
-    if (selected?.id === id) setSelected(null);
+    try {
+      await noteService.remove(id);
+      setNotes(prev => prev.filter(n => n.id !== id));
+      if (selected?.id === id) setSelected(null);
+      toast.success('노트를 삭제했습니다');
+    } catch {
+      toast.error('노트를 삭제하지 못했습니다');
+    }
   }
 
   const aiCount = notes.filter(n => n.source === 'conversation').length;
