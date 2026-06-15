@@ -314,7 +314,35 @@ export default function NotesPage() {
             </div>
           ) : notes.length === 0 ? (
             search ? (
-              <div className="text-gray-700 text-[11px] text-center py-8">검색 결과가 없습니다.</div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 16px 16px', gap: 12, textAlign: 'center' }}>
+                <div style={{
+                  width: 48, height: 48, borderRadius: 16,
+                  background: 'rgba(139,92,246,0.08)',
+                  border: '1px solid rgba(139,92,246,0.18)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <svg style={{ width: 22, height: 22, color: '#8b5cf6' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                      d="M21 21l-4.35-4.35M11 19a8 8 0 110-16 8 8 0 010 16z" />
+                  </svg>
+                </div>
+                <div>
+                  <div style={{ color: 'rgba(235,235,245,0.6)', fontSize: 12, fontWeight: 500 }}>일치하는 노트가 없어요</div>
+                  <div style={{ color: 'rgba(235,235,245,0.3)', fontSize: 10, marginTop: 4, lineHeight: 1.6 }}>
+                    "{search}" 검색 결과가 없어요
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSearch('')}
+                  style={{
+                    padding: '6px 14px', borderRadius: 10, fontSize: 11, fontWeight: 500,
+                    background: 'rgba(139,92,246,0.12)', border: '1px solid rgba(139,92,246,0.24)',
+                    color: '#a78bfa', cursor: 'pointer', transition: 'background 0.15s ease',
+                  }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(139,92,246,0.2)'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(139,92,246,0.12)'; }}
+                >검색 초기화</button>
+              </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 16px 16px', gap: 12, textAlign: 'center' }}>
                 <div style={{
