@@ -97,8 +97,17 @@ public static class ConversationRouter
             return ApiResponse<MessageResp>.Ok(assistantMessage.ToResp());
         });
 
-        app.MapDelete("/api/conversations/{sessionId:guid}", async (Guid sessionId, ISessionRepository sessionRepository, CancellationToken ct) =>
+        app.MapDelete("/api/conversations/{sessionId:guid}", async (
+            Guid sessionId,
+            ISessionRepository sessionRepository,
+            IWorkspaceService workspaceService,
+            CancellationToken ct) =>
         {
+            // Session end → archive the conversation as a Markdown log before deleting.
+            var session = await sessionRepository.GetByIdWithMessagesAsync(sessionId, ct);
+            if (session is not null)
+                await workspaceService.SaveConversationLogAsync(session, ct);
+
             await sessionRepository.DeleteAsync(sessionId, ct);
             return ApiResponse.OkResult();
         });
