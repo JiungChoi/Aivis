@@ -16,6 +16,7 @@ using AIVIS.Infrastructure.InfraServices.Tts;
 using AIVIS.Infrastructure.InfraServices.Tts.Implementations;
 using AIVIS.Infrastructure.InfraServices.Whisper;
 using AIVIS.Infrastructure.InfraServices.Whisper.Implementations;
+using AIVIS.Infrastructure.InfraServices.Workspace.Implementations;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -74,6 +75,7 @@ public static class InfrastructureExtensions
         services.AddHttpClient<IVectorSearchService, ChromaDbService>();
         services.Configure<ObsidianConfig>(configuration.GetSection(ObsidianConfig.Section));
         services.AddSingleton<IObsidianService, ObsidianService>();
+        services.AddSingleton<IWorkspaceService, WorkspaceService>();
 
         return services;
     }

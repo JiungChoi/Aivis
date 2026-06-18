@@ -2,8 +2,10 @@ using System.Text.Json.Serialization;
 using AIVIS.API.Routers;
 using AIVIS.Application.BackgroundServices;
 using AIVIS.Application.Extensions;
+using AIVIS.Domain.Services;
 using AIVIS.Infrastructure.DatabaseAccess;
 using AIVIS.Infrastructure.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +32,9 @@ builder.Services.AddHostedService<MemoryConsolidationService>();
 var app = builder.Build();
 
 await app.SeedAsync();
+
+// Ensure the local ~/AIVIS workspace folders exist (idempotent).
+await app.Services.GetRequiredService<IWorkspaceService>().InitializeWorkspaceFoldersAsync();
 
 if (app.Environment.IsDevelopment())
     app.MapOpenApi();
