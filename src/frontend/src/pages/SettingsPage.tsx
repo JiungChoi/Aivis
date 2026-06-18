@@ -101,6 +101,7 @@ export default function SettingsPage() {
   const [profileLanguage, setProfileLanguage] = useState('Korean');
   const [profileTone, setProfileTone] = useState('casual');
   const [profileSaved, setProfileSaved] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
 
   useEffect(() => {
     // Load from backend first, fall back to localStorage
@@ -124,6 +125,8 @@ export default function SettingsPage() {
   }, []);
 
   async function handleSaveProfile() {
+    if (savingProfile) return;
+    setSavingProfile(true);
     localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify({
       name: profileName, email: profileEmail, role: profileRole,
       language: profileLanguage, tone: profileTone,
@@ -135,6 +138,7 @@ export default function SettingsPage() {
         language: profileLanguage, tone: profileTone,
       });
     } catch { /* offline fallback: profile saved locally */ }
+    setSavingProfile(false);
     setProfileSaved(true);
     setTimeout(() => setProfileSaved(false), 2500);
   }
@@ -286,14 +290,17 @@ export default function SettingsPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <button
                   onClick={handleSaveProfile}
+                  disabled={savingProfile}
                   style={{
                     padding: '6px 16px', borderRadius: 8, fontSize: 11, fontWeight: 600,
                     background: 'linear-gradient(135deg, #0a84ff 0%, #5e5ce6 100%)',
-                    color: 'white', border: 'none', cursor: 'pointer',
+                    color: 'white', border: 'none',
+                    cursor: savingProfile ? 'not-allowed' : 'pointer',
+                    opacity: savingProfile ? 0.5 : 1,
                     boxShadow: '0 2px 8px rgba(10,132,255,0.35)',
                   }}
                 >
-                  저장
+                  {savingProfile ? '저장 중...' : '저장'}
                 </button>
                 {profileSaved && (
                   <span style={{ fontSize: 11, color: '#34c759' }}>✓ 저장됨</span>
