@@ -105,6 +105,8 @@ export default function TodoPage() {
         </div>
         <button
           onClick={() => setShowForm(v => !v)}
+          aria-label={showForm ? '할 일 추가 양식 닫기' : '할 일 추가 양식 열기'}
+          aria-expanded={showForm}
           style={{
             width: 30, height: 30, borderRadius: '50%',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
