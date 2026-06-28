@@ -75,7 +75,10 @@ export default function HomePage() {
     const fresh = await scheduleService.getByDate(today);
 
     const slot = findNextAvailableSlot(fresh, currentMins);
-    if (slot === null) return;
+    if (slot === null) {
+      toast.info('오늘은 더 들어갈 자리가 없어요');
+      return;
+    }
 
     const startTime = minsToTimeStr(slot * 30);
     const endTime = minsToTimeStr(slot * 30 + 60);
