@@ -81,6 +81,7 @@ export default function CommandPalette({ open, onClose, onNavigate }: CommandPal
   const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const itemRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   useEffect(() => {
     if (!open) return;
@@ -162,6 +163,11 @@ export default function CommandPalette({ open, onClose, onNavigate }: CommandPal
     return () => document.removeEventListener('keydown', onKey);
   }, [open, results, activeIndex, onClose, onNavigate]);
 
+  useEffect(() => {
+    if (!open) return;
+    itemRefs.current[activeIndex]?.scrollIntoView({ block: 'nearest' });
+  }, [open, activeIndex]);
+
   if (!open) return null;
 
   return (
@@ -224,6 +230,7 @@ export default function CommandPalette({ open, onClose, onNavigate }: CommandPal
             results.map((r, i) => (
               <button
                 key={`${r.type}-${r.id}`}
+                ref={el => { itemRefs.current[i] = el; }}
                 onClick={() => { onNavigate(r.page); onClose(); }}
                 onMouseEnter={() => setActiveIndex(i)}
                 style={{
