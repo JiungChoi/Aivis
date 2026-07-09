@@ -24,11 +24,11 @@ export function AddTodoForm({
 
   return (
     <div
-      className="rounded-2xl overflow-hidden mb-6"
+      className="overflow-hidden mb-6"
       style={{
-        background: '#1c1c1e',
-        border: '1px solid rgba(96,165,250,0.18)',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04)',
+        background: 'var(--bg-2)',
+        border: '1px solid var(--border-2)',
+        borderRadius: 'var(--r-md)',
         animation: 'bubble-pop-in 0.18s ease forwards',
       }}
     >
@@ -43,14 +43,14 @@ export function AddTodoForm({
           autoFocus
           style={{
             width: '100%', background: 'transparent', border: 'none', outline: 'none',
-            color: '#f1f5f9', fontSize: 14, fontWeight: 500,
-            letterSpacing: 0.2, caretColor: '#64b5ff',
+            color: 'var(--text-1)', fontSize: 14, fontWeight: 500,
+            caretColor: 'var(--accent)',
           }}
           className="placeholder-gray-700"
         />
       </div>
 
-      <div style={{ height: 1, background: 'rgba(255,255,255,0.05)', margin: '0 14px' }} />
+      <div style={{ height: 1, background: 'var(--border-1)', margin: '0 14px' }} />
 
       {/* Description */}
       <div style={{ padding: '8px 14px' }}>
@@ -61,13 +61,13 @@ export function AddTodoForm({
           onChange={e => onDescChange(e.target.value)}
           style={{
             width: '100%', background: 'transparent', border: 'none', outline: 'none',
-            color: '#6b7280', fontSize: 11, caretColor: '#64b5ff',
+            color: 'var(--text-3)', fontSize: 11, caretColor: 'var(--accent)',
           }}
           className="placeholder-gray-800"
         />
       </div>
 
-      <div style={{ height: 1, background: 'rgba(255,255,255,0.05)', margin: '0 14px' }} />
+      <div style={{ height: 1, background: 'var(--border-1)', margin: '0 14px' }} />
 
       {/* Priority pills + due date row */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px' }}>
@@ -77,11 +77,11 @@ export function AddTodoForm({
               key={p}
               onClick={() => onPriorityChange(p)}
               style={{
-                flex: 1, padding: '3px 0', borderRadius: 20, fontSize: 10, fontWeight: 500,
-                border: `1px solid ${newPriority === p ? PRIORITY_COLORS[p].border : 'rgba(255,255,255,0.07)'}`,
-                background: newPriority === p ? PRIORITY_COLORS[p].border + '33' : 'transparent',
-                color: newPriority === p ? PRIORITY_COLORS[p].text : '#4b5563',
-                cursor: 'pointer', transition: 'all 0.12s ease',
+                flex: 1, padding: '3px 0', borderRadius: 'var(--r-full)', fontSize: 10, fontWeight: 500,
+                border: `1px solid ${newPriority === p ? PRIORITY_COLORS[p].border : 'var(--border-1)'}`,
+                background: newPriority === p ? PRIORITY_COLORS[p].bg : 'transparent',
+                color: newPriority === p ? PRIORITY_COLORS[p].text : 'var(--text-3)',
+                cursor: 'pointer', transition: 'all var(--dur-1) var(--ease)',
               }}
             >
               {PRIORITY_LABELS[p]}
@@ -94,7 +94,7 @@ export function AddTodoForm({
           onChange={e => onDueChange(e.target.value)}
           style={{
             background: 'transparent', border: 'none', outline: 'none',
-            color: newDue ? '#64b5ff' : 'rgba(235,235,245,0.25)', fontSize: 10, colorScheme: 'dark',
+            color: newDue ? 'var(--accent)' : 'var(--text-3)', fontSize: 10, colorScheme: 'dark',
           }}
         />
       </div>
@@ -102,14 +102,14 @@ export function AddTodoForm({
       {/* Action bar */}
       <div style={{
         display: 'flex', gap: 6, padding: '8px 14px 12px',
-        borderTop: '1px solid rgba(255,255,255,0.05)',
+        borderTop: '1px solid var(--border-1)',
       }}>
         <button
           onClick={onCancel}
           style={{
-            padding: '6px 10px', borderRadius: 8, fontSize: 11, cursor: 'pointer',
-            border: '1px solid rgba(255,255,255,0.08)',
-            background: 'transparent', color: '#6b7280',
+            padding: '6px 10px', borderRadius: 'var(--r-sm)', fontSize: 11, cursor: 'pointer',
+            border: '1px solid var(--border-1)',
+            background: 'transparent', color: 'var(--text-2)',
           }}
         >
           취소
@@ -118,12 +118,12 @@ export function AddTodoForm({
           onClick={onAdd}
           disabled={!newTitle.trim() || adding}
           style={{
-            flex: 1, padding: '6px', borderRadius: 8, fontSize: 11, fontWeight: 600,
+            flex: 1, padding: '6px', borderRadius: 'var(--r-sm)', fontSize: 11, fontWeight: 600,
             border: 'none',
-            background: newTitle.trim() ? '#0a84ff' : 'rgba(37,99,235,0.18)',
-            color: newTitle.trim() ? '#fff' : 'rgba(235,235,245,0.25)',
+            background: newTitle.trim() ? 'var(--accent)' : 'var(--accent-bg)',
+            color: newTitle.trim() ? 'var(--on-accent)' : 'var(--text-3)',
             cursor: newTitle.trim() ? 'pointer' : 'default',
-            transition: 'all 0.15s ease',
+            transition: 'all var(--dur-2) var(--ease)',
           }}
         >
           {adding ? '추가 중...' : '추가'}

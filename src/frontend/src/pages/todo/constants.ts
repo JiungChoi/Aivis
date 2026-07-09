@@ -7,7 +7,7 @@ export const PRIORITY_LABELS: Record<TodoPriority, string> = {
 };
 
 export const PRIORITY_COLORS: Record<TodoPriority, { bg: string; text: string; border: string }> = {
-  low:    { bg: '#2c2c2e', text: '#6b7280', border: '#2a3a4a' },
-  normal: { bg: '#1c1c1e', text: '#64b5ff', border: '#0062cc' },
-  high:   { bg: '#2a0d0d', text: '#f87171', border: '#991b1b' },
+  low:    { bg: 'rgba(255,255,255,0.06)', text: 'var(--text-3)', border: 'var(--border-1)' },
+  normal: { bg: 'var(--accent-bg)',       text: 'var(--accent)', border: 'var(--accent-border)' },
+  high:   { bg: 'var(--danger-bg)',       text: 'var(--danger)', border: 'var(--danger-border)' },
 };

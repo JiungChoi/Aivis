@@ -179,17 +179,17 @@ export default function SchedulePage() {
   const nowTop = (nowMins / 30) * SLOT_H;
 
   return (
-    <div className="flex-1 flex overflow-hidden" style={{ background: '#000000' }}>
+    <div className="flex-1 flex overflow-hidden" style={{ background: 'var(--bg-0)' }}>
 
       {/* ── 좌측: 달력 ── */}
       <div className="w-72 flex-shrink-0 flex flex-col overflow-hidden"
-        style={{ borderRight: '1px solid rgba(255,255,255,0.05)' }}>
+        style={{ borderRight: '1px solid var(--border-1)' }}>
 
         {/* 헤더 */}
         <div style={{
           padding: '14px 16px 10px',
-          background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-          borderBottom: '1px solid rgba(255,255,255,0.05)',
+          background: 'var(--bg-1)',
+          borderBottom: '1px solid var(--border-1)',
         }}>
           <div className="flex items-center justify-between mb-4">
             <button onClick={prevMonth} className="text-gray-600 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/5">
@@ -198,11 +198,11 @@ export default function SchedulePage() {
               </svg>
             </button>
             <div className="flex items-center gap-2">
-              <span style={{ color: 'white', fontWeight: 600, fontSize: 13 }}>{viewYear}년 {MONTH_NAMES[viewMonth]}</span>
+              <span style={{ color: 'var(--text-1)', fontWeight: 600, fontSize: 13 }}>{viewYear}년 {MONTH_NAMES[viewMonth]}</span>
               {(viewYear !== today.getFullYear() || viewMonth !== today.getMonth()) && (
                 <button
                   onClick={() => { setViewYear(today.getFullYear()); setViewMonth(today.getMonth()); setSelectedDate(todayKey); }}
-                  style={{ fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(10,132,255,0.15)', color: '#64b5ff', border: 'none', cursor: 'pointer' }}
+                  style={{ fontSize: 9, padding: '1px 6px', borderRadius: 'var(--r-sm)', background: 'var(--accent-bg)', color: 'var(--accent)', border: 'none', cursor: 'pointer' }}
                 >오늘</button>
               )}
             </div>
@@ -215,7 +215,7 @@ export default function SchedulePage() {
 
           <div className="grid grid-cols-7 mb-1">
             {DAY_NAMES.map((d, i) => (
-              <div key={d} style={{ textAlign: 'center', fontSize: 10, fontWeight: 500, color: i === 0 ? '#f87171' : i === 6 ? '#64b5ff' : 'rgba(235,235,245,0.3)' }}>
+              <div key={d} style={{ textAlign: 'center', fontSize: 10, fontWeight: 500, color: i === 0 ? 'var(--danger)' : i === 6 ? 'var(--accent)' : 'var(--text-3)' }}>
                 {d}
               </div>
             ))}
@@ -235,13 +235,13 @@ export default function SchedulePage() {
                   onClick={() => setSelectedDate(dateKey)}
                   className="relative flex flex-col items-center py-1 rounded-lg transition-colors"
                   style={{
-                    background: isSelected ? '#0a84ff' : isToday ? 'rgba(10,132,255,0.12)' : 'transparent',
-                    color: isSelected ? 'white' : isToday ? '#64b5ff' : col === 0 ? '#f87171' : col === 6 ? '#64b5ff' : 'rgba(235,235,245,0.55)',
+                    background: isSelected ? 'var(--accent)' : isToday ? 'var(--accent-bg)' : 'transparent',
+                    color: isSelected ? 'var(--on-accent)' : isToday ? 'var(--accent)' : col === 0 ? 'var(--danger)' : col === 6 ? 'var(--accent)' : 'var(--text-2)',
                   }}
                 >
                   <span style={{ fontSize: 11, fontWeight: isToday ? 700 : 400 }}>{day}</span>
                   {hasItems && !isSelected && (
-                    <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#0a84ff', marginTop: 1 }} />
+                    <span style={{ width: 4, height: 4, borderRadius: 'var(--r-full)', background: 'var(--accent)', marginTop: 1 }} />
                   )}
                 </button>
               );
@@ -252,23 +252,23 @@ export default function SchedulePage() {
         {/* 월 통계 */}
         <div style={{ padding: '12px 16px' }}>
           <div style={{
-            borderRadius: 10, padding: 12,
-            background: 'rgba(28,28,30,0.72)', backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(255,255,255,0.05)',
+            borderRadius: 'var(--r-md)', padding: 12,
+            background: 'var(--bg-2)',
+            border: '1px solid var(--border-1)',
           }}>
-            <div style={{ color: 'rgba(235,235,245,0.3)', fontSize: 10, marginBottom: 8 }}>{MONTH_NAMES[viewMonth]} 통계</div>
+            <div style={{ color: 'var(--text-3)', fontSize: 10, marginBottom: 8 }}>{MONTH_NAMES[viewMonth]} 통계</div>
             <div className="grid grid-cols-3 gap-2 text-center">
               <div>
-                <div style={{ color: 'white', fontWeight: 700, fontSize: 15 }}>{Object.values(monthSchedules).flat().length}</div>
-                <div style={{ color: 'rgba(235,235,245,0.3)', fontSize: 9 }}>총 일정</div>
+                <div style={{ color: 'var(--text-1)', fontWeight: 700, fontSize: 15 }}>{Object.values(monthSchedules).flat().length}</div>
+                <div style={{ color: 'var(--text-3)', fontSize: 9 }}>총 일정</div>
               </div>
               <div>
-                <div style={{ color: 'white', fontWeight: 700, fontSize: 15 }}>{Object.values(monthSchedules).filter(v => v.length > 0).length}</div>
-                <div style={{ color: 'rgba(235,235,245,0.3)', fontSize: 9 }}>일정 있는 날</div>
+                <div style={{ color: 'var(--text-1)', fontWeight: 700, fontSize: 15 }}>{Object.values(monthSchedules).filter(v => v.length > 0).length}</div>
+                <div style={{ color: 'var(--text-3)', fontSize: 9 }}>일정 있는 날</div>
               </div>
               <div>
-                <div style={{ color: 'white', fontWeight: 700, fontSize: 15 }}>{Object.values(monthSchedules).flat().filter(s => s.category === 'Meeting').length}</div>
-                <div style={{ color: 'rgba(235,235,245,0.3)', fontSize: 9 }}>미팅</div>
+                <div style={{ color: 'var(--text-1)', fontWeight: 700, fontSize: 15 }}>{Object.values(monthSchedules).flat().filter(s => s.category === 'Meeting').length}</div>
+                <div style={{ color: 'var(--text-3)', fontSize: 9 }}>미팅</div>
               </div>
             </div>
           </div>
@@ -277,7 +277,7 @@ export default function SchedulePage() {
         {/* 오늘 일정 미니 리스트 */}
         <div className="flex-1 overflow-y-auto" style={{ padding: '0 16px 16px' }}>
           {daySchedules.length > 0 && (
-            <div style={{ color: 'rgba(235,235,245,0.3)', fontSize: 10, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 8 }}>
+            <div style={{ color: 'var(--text-3)', fontSize: 10, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 8 }}>
               {new Date(selectedDate + 'T00:00:00').toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}
             </div>
           )}
@@ -286,11 +286,11 @@ export default function SchedulePage() {
               const c = CATEGORY_BG[item.category] ?? CATEGORY_BG.Other;
               return (
                 <div key={item.id} style={{
-                  borderRadius: 7, padding: '6px 8px',
+                  borderRadius: 'var(--r-sm)', padding: '6px 8px',
                   background: c.bg, border: `1px solid ${c.border}`,
                   display: 'flex', alignItems: 'center', gap: 6,
                 }}>
-                  <span style={{ fontSize: 10, fontWeight: 600, fontFamily: 'monospace', color: 'rgba(235,235,245,0.5)', flexShrink: 0 }}>{item.startTime}</span>
+                  <span style={{ fontSize: 10, fontWeight: 600, fontFamily: 'ui-monospace, monospace', color: 'var(--text-2)', flexShrink: 0 }}>{item.startTime}</span>
                   <span style={{ fontSize: 11, color: c.text, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title}</span>
                 </div>
               );
@@ -306,23 +306,23 @@ export default function SchedulePage() {
         <div style={{
           height: 52, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '0 20px', flexShrink: 0,
-          background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-          borderBottom: '1px solid rgba(255,255,255,0.05)',
+          background: 'var(--bg-1)',
+          borderBottom: '1px solid var(--border-1)',
         }}>
           <div>
-            <div style={{ color: 'white', fontWeight: 700, fontSize: 14, letterSpacing: '-0.02em' }}>
+            <div style={{ color: 'var(--text-1)', fontWeight: 700, fontSize: 14, letterSpacing: '-0.01em' }}>
               {new Date(selectedDate + 'T00:00:00').toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' })}
             </div>
-            <div style={{ color: 'rgba(235,235,245,0.28)', fontSize: 11, marginTop: 1 }}>
+            <div style={{ color: 'var(--text-3)', fontSize: 11, marginTop: 1 }}>
               {daySchedules.length}개 일정
             </div>
           </div>
           <button
             onClick={() => { setNewStartTime('09:00'); setNewEndTime('10:00'); setShowModal(true); }}
             style={{
-              padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600,
-              background: 'rgba(10,132,255,0.15)', border: '1px solid rgba(10,132,255,0.3)',
-              color: '#64b5ff', cursor: 'pointer',
+              padding: '6px 14px', borderRadius: 'var(--r-sm)', fontSize: 12, fontWeight: 600,
+              background: 'var(--accent-bg)', border: '1px solid var(--accent-border)',
+              color: 'var(--accent)', cursor: 'pointer',
             }}
           >+ 일정 추가</button>
         </div>
@@ -343,7 +343,7 @@ export default function SchedulePage() {
                   {/* hour label */}
                   <div style={{ width: 48, flexShrink: 0, paddingTop: isHour ? 3 : 0, paddingRight: 8, textAlign: 'right' }}>
                     {isHour && (
-                      <span style={{ fontSize: 10, color: 'rgba(235,235,245,0.2)', fontFamily: 'monospace', fontWeight: 500 }}>
+                      <span style={{ fontSize: 10, color: 'var(--text-3)', fontFamily: 'ui-monospace, monospace', fontWeight: 500 }}>
                         {String(hour).padStart(2,'0')}
                       </span>
                     )}
@@ -351,7 +351,7 @@ export default function SchedulePage() {
                   {/* grid line */}
                   <div style={{
                     flex: 1, height: '100%',
-                    borderTop: isHour ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(255,255,255,0.02)',
+                    borderTop: isHour ? '1px solid var(--border-1)' : '1px solid rgba(255,255,255,0.03)',
                     position: 'relative',
                   }} />
                 </div>
@@ -365,16 +365,16 @@ export default function SchedulePage() {
               return (
                 <div style={{
                   position: 'absolute', top, left: 56, right: 8, height: h, zIndex: 2,
-                  background: 'rgba(10,132,255,0.08)', border: '1.5px dashed rgba(10,132,255,0.4)',
-                  borderRadius: 6, pointerEvents: 'none',
+                  background: 'var(--accent-bg)', border: '1.5px dashed var(--accent-border)',
+                  borderRadius: 'var(--r-sm)', pointerEvents: 'none',
                 }} />
               );
             })()}
 
             {/* Now indicator */}
             {selectedDate === todayKey && (
-              <div style={{ position: 'absolute', top: nowTop, left: 48, right: 0, height: 1, background: '#0a84ff', zIndex: 5, opacity: 0.8 }}>
-                <div style={{ position: 'absolute', left: -4, top: -3, width: 7, height: 7, borderRadius: '50%', background: '#0a84ff' }} />
+              <div style={{ position: 'absolute', top: nowTop, left: 48, right: 0, height: 1, background: 'var(--accent)', zIndex: 5, opacity: 0.8 }}>
+                <div style={{ position: 'absolute', left: -4, top: -3, width: 7, height: 7, borderRadius: 'var(--r-full)', background: 'var(--accent)' }} />
               </div>
             )}
 
@@ -393,14 +393,13 @@ export default function SchedulePage() {
                     position: 'absolute', top: top + 2, left: 56, right: 8,
                     height: h - 4, zIndex: 4,
                     background: c.bg, border: `1px solid ${c.border}`,
-                    borderRadius: 6, padding: '4px 8px',
+                    borderRadius: 'var(--r-sm)', padding: '4px 8px',
                     display: 'flex', flexDirection: 'column',
                     cursor: 'default',
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
-                    transition: 'box-shadow 0.1s ease',
+                    transition: 'border-color var(--dur-1) var(--ease)',
                   }}
-                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.boxShadow = '0 2px 10px rgba(0,0,0,0.5)'}
-                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.boxShadow = '0 1px 4px rgba(0,0,0,0.3)'}
+                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-2)'}
+                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = c.border}
                 >
                   <div className="flex items-start justify-between gap-1 flex-1 min-h-0">
                     <div className="flex-1 min-w-0 flex flex-col justify-between h-full">
@@ -408,7 +407,7 @@ export default function SchedulePage() {
                         {item.title}
                       </div>
                       {h >= SLOT_H * 2 && (
-                        <div style={{ fontSize: 9, color: 'rgba(235,235,245,0.3)', fontFamily: 'monospace' }}>
+                        <div style={{ fontSize: 9, color: 'var(--text-3)', fontFamily: 'ui-monospace, monospace' }}>
                           {item.startTime}{item.endTime ? ` – ${item.endTime}` : ''}
                         </div>
                       )}
@@ -417,7 +416,7 @@ export default function SchedulePage() {
                       onClick={() => handleDelete(item.id)}
                       style={{
                         flexShrink: 0, opacity: 0, transition: 'opacity 0.15s', padding: 1,
-                        background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(235,235,245,0.4)',
+                        background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)',
                         fontSize: 10, lineHeight: 1,
                       }}
                       onMouseEnter={e => (e.currentTarget as HTMLElement).style.opacity = '1'}
@@ -433,7 +432,7 @@ export default function SchedulePage() {
                     onMouseDown={(e) => handleEventResizeStart(e, item)}
                     style={{
                       position: 'absolute', bottom: 0, left: 0, right: 0, height: 6,
-                      cursor: 'ns-resize', borderRadius: '0 0 5px 5px',
+                      cursor: 'ns-resize', borderRadius: '0 0 var(--r-sm) var(--r-sm)',
                     }}
                   />
                 </div>

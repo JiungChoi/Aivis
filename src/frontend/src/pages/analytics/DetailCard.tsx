@@ -26,12 +26,12 @@ export function DetailCard({
       padding: '18px 20px',
       width: 240,
       zIndex: 30,
-      boxShadow: `0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04), 0 0 40px ${color}12`,
+      boxShadow: `0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04)`,
     }}>
-      {/* Header accent bar */}
+      {/* Header accent bar (solid branch colour) */}
       <div style={{
         position: 'absolute', top: 0, left: 20, right: 20, height: 2,
-        background: `linear-gradient(90deg, ${color}, ${item.branch.gradientEnd})`,
+        background: color,
         borderRadius: '0 0 2px 2px',
         opacity: 0.8,
       }} />
@@ -159,7 +159,7 @@ export function DetailCard({
           borderRadius: 10,
           fontSize: 11,
           fontWeight: 600,
-          background: `linear-gradient(135deg, ${color}22, ${color}11)`,
+          background: `${color}1a`,
           border: `1px solid ${color}44`,
           color,
           cursor: 'pointer',
@@ -171,11 +171,11 @@ export function DetailCard({
           gap: 6,
         }}
         onMouseEnter={e => {
-          (e.currentTarget as HTMLElement).style.background = `linear-gradient(135deg, ${color}33, ${color}22)`;
+          (e.currentTarget as HTMLElement).style.background = `${color}2b`;
           (e.currentTarget as HTMLElement).style.borderColor = `${color}77`;
         }}
         onMouseLeave={e => {
-          (e.currentTarget as HTMLElement).style.background = `linear-gradient(135deg, ${color}22, ${color}11)`;
+          (e.currentTarget as HTMLElement).style.background = `${color}1a`;
           (e.currentTarget as HTMLElement).style.borderColor = `${color}44`;
         }}
       >

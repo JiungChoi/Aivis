@@ -40,7 +40,7 @@ export function AddEventModal({ startTime, endTime, onConfirm, onClose }: AddMod
             onKeyDown={e => e.key === 'Enter' && title.trim() && onConfirm({ title: title.trim(), startTime: start, endTime: end, category: cat, description: desc.trim() || undefined })}
             style={{
               width: '100%', background: 'transparent', border: 'none', outline: 'none',
-              color: '#f1f5f9', fontSize: 15, fontWeight: 500, caretColor: '#64b5ff',
+              color: '#f1f5f9', fontSize: 15, fontWeight: 500, caretColor: 'var(--accent)',
             }}
           />
         </div>
@@ -50,12 +50,12 @@ export function AddEventModal({ startTime, endTime, onConfirm, onClose }: AddMod
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 9, color: 'rgba(235,235,245,0.3)', marginBottom: 3, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>시작</div>
             <input type="time" value={start} onChange={e => setStart(e.target.value)}
-              style={{ background: 'transparent', border: 'none', outline: 'none', color: '#64b5ff', fontSize: 13, fontWeight: 600, colorScheme: 'dark' }} />
+              style={{ background: 'transparent', border: 'none', outline: 'none', color: 'var(--accent)', fontSize: 13, fontWeight: 600, colorScheme: 'dark' }} />
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 9, color: 'rgba(235,235,245,0.3)', marginBottom: 3, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>종료</div>
             <input type="time" value={end} onChange={e => setEnd(e.target.value)}
-              style={{ background: 'transparent', border: 'none', outline: 'none', color: '#64b5ff', fontSize: 13, fontWeight: 600, colorScheme: 'dark' }} />
+              style={{ background: 'transparent', border: 'none', outline: 'none', color: 'var(--accent)', fontSize: 13, fontWeight: 600, colorScheme: 'dark' }} />
           </div>
         </div>
 
@@ -82,7 +82,7 @@ export function AddEventModal({ startTime, endTime, onConfirm, onClose }: AddMod
         <div style={{ padding: '8px 16px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
           <input type="text" placeholder="메모 (선택)"
             value={desc} onChange={e => setDesc(e.target.value)}
-            style={{ width: '100%', background: 'transparent', border: 'none', outline: 'none', color: '#6b7280', fontSize: 11, caretColor: '#64b5ff' }}
+            style={{ width: '100%', background: 'transparent', border: 'none', outline: 'none', color: '#6b7280', fontSize: 11, caretColor: 'var(--accent)' }}
           />
         </div>
 
@@ -96,9 +96,9 @@ export function AddEventModal({ startTime, endTime, onConfirm, onClose }: AddMod
             onClick={() => title.trim() && onConfirm({ title: title.trim(), startTime: start, endTime: end, category: cat, description: desc.trim() || undefined })}
             disabled={!title.trim()}
             style={{
-              flex: 1, padding: '7px', borderRadius: 8, fontSize: 11, fontWeight: 600, cursor: title.trim() ? 'pointer' : 'default',
-              border: 'none', background: title.trim() ? '#0a84ff' : 'rgba(37,99,235,0.18)',
-              color: title.trim() ? '#fff' : 'rgba(235,235,245,0.25)', transition: 'all 0.15s',
+              flex: 1, padding: '7px', borderRadius: 'var(--r-sm)', fontSize: 11, fontWeight: 600, cursor: title.trim() ? 'pointer' : 'default',
+              border: 'none', background: title.trim() ? 'var(--accent)' : 'var(--accent-bg)',
+              color: title.trim() ? 'var(--on-accent)' : 'var(--text-3)', transition: 'all 0.15s',
             }}
           >추가</button>
         </div>

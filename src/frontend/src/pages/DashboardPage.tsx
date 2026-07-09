@@ -136,70 +136,62 @@ export default function HomePage() {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden" style={{
-      background: 'linear-gradient(160deg, #05050f 0%, #000008 45%, #020210 100%)',
+      background: 'var(--bg-0)',
     }}>
-      {/* Ambient glow layers */}
-      <div style={{
-        position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0,
-        background: 'radial-gradient(ellipse at 20% 0%, rgba(10,132,255,0.06) 0%, transparent 55%), radial-gradient(ellipse at 80% 100%, rgba(94,92,230,0.05) 0%, transparent 50%)',
-      }} />
-
       {/* ── 헤더 ── */}
       <div className="flex items-center justify-between px-6 flex-shrink-0"
         style={{
           height: 54,
-          borderBottom: '1px solid rgba(255,255,255,0.05)',
-          background: 'linear-gradient(180deg, rgba(10,10,20,0.9) 0%, rgba(5,5,12,0.8) 100%)',
-          backdropFilter: 'blur(24px) saturate(150%)',
-          WebkitBackdropFilter: 'blur(24px) saturate(150%)',
-          boxShadow: '0 1px 0 rgba(255,255,255,0.03), 0 4px 20px rgba(0,0,0,0.3)',
+          borderBottom: '1px solid var(--border-1)',
+          background: 'var(--bg-1)',
           position: 'relative', zIndex: 10,
         }}>
         <div>
           <div style={{
-            fontWeight: 700,
-            fontSize: 15,
-            letterSpacing: '-0.02em',
+            fontWeight: 600,
+            fontSize: 16,
+            letterSpacing: '-0.01em',
             lineHeight: 1.2,
-            background: 'linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.8) 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
+            color: 'var(--text-1)',
           }}>{user ? `${user.name} 님, ${greeting()}` : greeting()}</div>
-          <div style={{ color: 'rgba(235,235,245,0.3)', fontSize: 11, marginTop: 2, letterSpacing: '-0.01em' }}>{dateStr()}</div>
+          <div style={{ color: 'var(--text-3)', fontSize: 12, marginTop: 2 }}>{dateStr()}</div>
         </div>
         <div className="flex items-center gap-3 relative">
           <ObsidianButton />
           <button
             onClick={() => setShowCityPicker((v) => !v)}
-            className="text-gray-500 text-xs hover:text-gray-300 transition-colors flex items-center gap-1"
+            className="text-xs transition-colors flex items-center gap-1"
+            style={{ color: 'var(--text-3)' }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--text-1)'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--text-3)'; }}
           >
             {weather ? `${weather.icon} ${weather.temperature}°C  ${weather.city}` : '날씨 로딩 중...'}
-            <span className="text-gray-600 text-[10px] ml-0.5">▾</span>
+            <span className="text-[10px] ml-0.5" style={{ color: 'var(--text-3)' }}>▾</span>
           </button>
 
           {showCityPicker && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => { setShowCityPicker(false); setCitySearch(''); }} />
               <div
-                className="absolute right-0 top-7 z-50 rounded-lg overflow-hidden"
+                className="absolute right-0 top-7 z-50 overflow-hidden"
                 style={{
-                  background: '#0d1f30',
-                  border: '1px solid rgba(84,84,88,0.35)',
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+                  background: 'var(--bg-3)',
+                  border: '1px solid var(--border-2)',
+                  borderRadius: 'var(--r-md)',
+                  boxShadow: 'var(--shadow-overlay)',
                   minWidth: 160,
                 }}
               >
                 {/* 검색바 */}
-                <div className="px-2 py-1.5" style={{ borderBottom: '1px solid rgba(84,84,88,0.25)' }}>
+                <div className="px-2 py-1.5" style={{ borderBottom: '1px solid var(--border-1)' }}>
                   <input
                     autoFocus
                     type="text"
                     placeholder="도시 검색..."
                     value={citySearch}
                     onChange={(e) => setCitySearch(e.target.value)}
-                    className="w-full rounded text-[11px] px-2 py-1 focus:outline-none placeholder-gray-700"
-                    style={{ background: '#1c1c1e', border: '1px solid #1e3a5a', color: '#d1d5db' }}
+                    className="ui-field"
+                    style={{ height: 30, fontSize: 12 }}
                   />
                 </div>
                 {/* 도시 목록 */}
@@ -213,14 +205,14 @@ export default function HomePage() {
                       onClick={() => { selectCity(c.key); setCitySearch(''); }}
                       className="w-full text-left px-3 py-1.5 transition-colors"
                       style={{
-                        color: c.key === selectedCityKey ? '#64b5ff' : '#9ca3af',
-                        background: c.key === selectedCityKey ? 'rgba(59,130,246,0.1)' : 'transparent',
+                        color: c.key === selectedCityKey ? 'var(--accent)' : 'var(--text-2)',
+                        background: c.key === selectedCityKey ? 'var(--accent-bg)' : 'transparent',
                       }}
-                      onMouseEnter={(e) => { if (c.key !== selectedCityKey) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)'; }}
-                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = c.key === selectedCityKey ? 'rgba(59,130,246,0.1)' : 'transparent'; }}
+                      onMouseEnter={(e) => { if (c.key !== selectedCityKey) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)'; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = c.key === selectedCityKey ? 'var(--accent-bg)' : 'transparent'; }}
                     >
                       <span className="text-xs">{c.name}</span>
-                      <span className="text-[10px] ml-1.5" style={{ color: c.key === selectedCityKey ? '#0a84ff' : '#4b5563' }}>{c.englishName}</span>
+                      <span className="text-[10px] ml-1.5" style={{ color: c.key === selectedCityKey ? 'var(--accent)' : 'var(--text-3)' }}>{c.englishName}</span>
                     </button>
                   ))}
                 </div>
@@ -249,65 +241,65 @@ export default function HomePage() {
           <div style={{
             flexShrink: 0,
             padding: '7px 24px',
-            borderBottom: '1px solid rgba(255,255,255,0.04)',
-            background: 'linear-gradient(90deg, rgba(10,132,255,0.05) 0%, rgba(94,92,230,0.03) 100%)',
+            borderBottom: '1px solid var(--border-1)',
+            background: 'var(--bg-1)',
             display: 'flex', alignItems: 'center', gap: 20, overflow: 'hidden',
             position: 'relative', zIndex: 5,
           }}>
             {/* 총 일정 수 */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
               <div style={{
-                width: 22, height: 22, borderRadius: 7,
-                background: 'rgba(10,132,255,0.12)',
-                border: '1px solid rgba(10,132,255,0.2)',
+                width: 22, height: 22, borderRadius: 'var(--r-sm)',
+                background: 'var(--accent-bg)',
+                border: '1px solid var(--accent-border)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                <svg style={{ width: 11, height: 11, color: '#0a84ff' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg style={{ width: 11, height: 11, color: 'var(--accent)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                     d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
-              <span style={{ color: 'rgba(235,235,245,0.5)', fontSize: 11 }}>
-                오늘 <span style={{ color: '#0a84ff', fontWeight: 600 }}>{schedule.length}개</span> 일정
+              <span style={{ color: 'var(--text-2)', fontSize: 12 }}>
+                오늘 <span className="tabular" style={{ color: 'var(--accent)', fontWeight: 600 }}>{schedule.length}개</span> 일정
               </span>
             </div>
 
             {/* 구분선 */}
-            <div style={{ width: 1, height: 14, background: 'rgba(255,255,255,0.06)', flexShrink: 0 }} />
+            <div style={{ width: 1, height: 14, background: 'var(--border-1)', flexShrink: 0 }} />
 
             {/* 현재/다음 일정 */}
             {nowEvent ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
-                <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#34d399', flexShrink: 0, boxShadow: '0 0 6px #34d39980' }} />
-                <span style={{ color: 'rgba(235,235,245,0.4)', fontSize: 11, flexShrink: 0 }}>진행 중</span>
-                <span style={{ color: 'rgba(235,235,245,0.75)', fontSize: 11, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div style={{ width: 6, height: 6, borderRadius: 'var(--r-full)', background: 'var(--ok)', flexShrink: 0, animation: 'live-dot 2s var(--ease) infinite' }} />
+                <span style={{ color: 'var(--text-2)', fontSize: 12, flexShrink: 0 }}>진행 중</span>
+                <span style={{ color: 'var(--text-1)', fontSize: 12, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {nowEvent.title}
                 </span>
-                <span style={{ color: 'rgba(235,235,245,0.2)', fontSize: 10, flexShrink: 0 }}>
+                <span className="tabular" style={{ color: 'var(--text-3)', fontSize: 11, flexShrink: 0 }}>
                   ~ {nowEvent.endTime ?? ''}
                 </span>
               </div>
             ) : nextEvent ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
-                <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#facc15', flexShrink: 0 }} />
-                <span style={{ color: 'rgba(235,235,245,0.4)', fontSize: 11, flexShrink: 0 }}>다음</span>
-                <span style={{ color: 'rgba(235,235,245,0.75)', fontSize: 11, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div style={{ width: 6, height: 6, borderRadius: 'var(--r-full)', background: 'var(--warn)', flexShrink: 0 }} />
+                <span style={{ color: 'var(--text-2)', fontSize: 12, flexShrink: 0 }}>다음</span>
+                <span style={{ color: 'var(--text-1)', fontSize: 12, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {nextEvent.title}
                 </span>
-                <span style={{ color: 'rgba(235,235,245,0.2)', fontSize: 10, flexShrink: 0 }}>
+                <span className="tabular" style={{ color: 'var(--text-3)', fontSize: 11, flexShrink: 0 }}>
                   {nextEvent.startTime}
                 </span>
               </div>
             ) : schedule.length > 0 ? (
-              <span style={{ color: 'rgba(235,235,245,0.25)', fontSize: 11 }}>오늘 일정 모두 완료</span>
+              <span style={{ color: 'var(--text-3)', fontSize: 12 }}>오늘 일정 모두 완료</span>
             ) : null}
 
             {/* 남은 일정 수 (우측) */}
             {remainingCount > 0 && (
               <>
                 <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
-                  <span style={{ color: 'rgba(235,235,245,0.2)', fontSize: 10 }}>남은 일정</span>
-                  <span style={{ color: 'rgba(235,235,245,0.45)', fontSize: 11, fontWeight: 600 }}>{remainingCount}</span>
+                  <span style={{ color: 'var(--text-3)', fontSize: 11 }}>남은 일정</span>
+                  <span className="tabular" style={{ color: 'var(--text-2)', fontSize: 12, fontWeight: 600 }}>{remainingCount}</span>
                 </div>
               </>
             )}
@@ -334,7 +326,7 @@ export default function HomePage() {
         <ResizeHandle onMouseDown={(e) => startResize(0, e)} />
 
         {/* ── COL 2: 시간 분석 + 작업 제안 ── */}
-        <div className="p-4 space-y-4" style={{ width: col2, flexShrink: 0, overflowY: 'auto', overflowX: 'hidden', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="p-4 space-y-4" style={{ width: col2, flexShrink: 0, overflowY: 'auto', overflowX: 'hidden', borderRight: '1px solid var(--border-1)' }}>
           <TimeAnalysisPanel
             schedule={schedule}
             scheduleError={scheduleError}
