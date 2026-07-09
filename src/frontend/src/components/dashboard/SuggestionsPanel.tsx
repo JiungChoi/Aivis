@@ -40,13 +40,13 @@ export function SuggestionsPanel({ suggestions, loading, error, onRetry, onSelec
           textTransform: 'uppercase' as const,
           fontFamily: 'system-ui, -apple-system, sans-serif',
         }}>AI 작업 제안</span>
-        <span style={{ fontSize: 9, background: 'rgba(10,132,255,0.15)', color: '#64b5ff', padding: '1px 6px', borderRadius: 99 }}>AI</span>
+        <span style={{ fontSize: 9, background: 'var(--accent-bg)', color: 'var(--accent)', padding: '1px 6px', borderRadius: 99 }}>AI</span>
       </div>
 
       {error ? (
         <div className="text-center py-4">
           <div className="text-[10px] mb-2" style={{ color: '#f87171' }}>AI 제안을 불러오지 못했습니다.</div>
-          <button onClick={onRetry} className="text-[10px] underline" style={{ color: '#64b5ff' }}>재시도</button>
+          <button onClick={onRetry} className="text-[10px] underline" style={{ color: 'var(--accent)' }}>재시도</button>
         </div>
       ) : loading || suggestions.length === 0 ? (
         <div className="space-y-1.5">
@@ -71,7 +71,7 @@ export function SuggestionsPanel({ suggestions, loading, error, onRetry, onSelec
                   padding: '8px 10px',
                   transition: 'border-color 0.15s ease, background 0.15s ease',
                 }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(10,132,255,0.2)'; (e.currentTarget as HTMLElement).style.background = '#242426'; }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--accent-bg)'; (e.currentTarget as HTMLElement).style.background = '#242426'; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.05)'; (e.currentTarget as HTMLElement).style.background = '#1c1c1e'; }}
                 onClick={() => onSelect(s.title)}
               >
@@ -95,12 +95,12 @@ export function SuggestionsPanel({ suggestions, loading, error, onRetry, onSelec
                   }}
                   className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
                   style={{
-                    background: 'rgba(10,132,255,0.12)',
-                    border: '1px solid rgba(10,132,255,0.3)',
+                    background: 'var(--accent-bg)',
+                    border: '1px solid var(--accent-border)',
                     borderRadius: 5,
                     padding: '2px 7px',
                     fontSize: 9,
-                    color: '#64b5ff',
+                    color: 'var(--accent)',
                     cursor: addingId === i ? 'default' : 'grab',
                     whiteSpace: 'nowrap',
                   }}

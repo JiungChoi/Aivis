@@ -87,13 +87,14 @@ export default function WireframeGlobe({ w, h, isRecording, isSpeaking }: {
       const pulse = 1 + (isRecording ? 0.04 : 0.018) * Math.sin(t * (isRecording ? 3.5 : 1.8));
       const r = BASE_R * pulse;
 
-      const mc: [number, number, number] = isRecording ? [255, 60, 40] : [10, 132, 255];
-      const gc: [number, number, number] = isRecording ? [255, 140, 80] : [80, 200, 255];
+      // Idle colours accent-derived (var(--accent) #5E9EFF / var(--accent-hover) #7DB1FF)
+      const mc: [number, number, number] = isRecording ? [255, 60, 40] : [94, 158, 255];
+      const gc: [number, number, number] = isRecording ? [255, 140, 80] : [125, 177, 255];
 
-      // Ambient outer glow
+      // Ambient outer glow (~50% attenuated)
       const og = ctx.createRadialGradient(cx, cy, r * 0.5, cx, cy, r * 1.9);
-      og.addColorStop(0, `rgba(${mc[0]},${mc[1]},${mc[2]},0.09)`);
-      og.addColorStop(0.45, `rgba(${mc[0]},${mc[1]},${mc[2]},0.04)`);
+      og.addColorStop(0, `rgba(${mc[0]},${mc[1]},${mc[2]},0.045)`);
+      og.addColorStop(0.45, `rgba(${mc[0]},${mc[1]},${mc[2]},0.02)`);
       og.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.beginPath(); ctx.arc(cx, cy, r * 1.9, 0, Math.PI * 2);
       ctx.fillStyle = og; ctx.fill();
@@ -256,11 +257,11 @@ export default function WireframeGlobe({ w, h, isRecording, isSpeaking }: {
       ctx.lineWidth = 1.4;
       ctx.stroke();
 
-      // Core glow (bright reactor center)
+      // Core glow (reactor center, ~50% attenuated)
       const cg = ctx.createRadialGradient(cx, cy, 0, cx, cy, r * 0.42);
-      cg.addColorStop(0, strokeGC(0.55 * reactorPulse));
-      cg.addColorStop(0.3, strokeGC(0.22 * reactorPulse));
-      cg.addColorStop(0.6, strokeMC(0.10));
+      cg.addColorStop(0, strokeGC(0.28 * reactorPulse));
+      cg.addColorStop(0.3, strokeGC(0.11 * reactorPulse));
+      cg.addColorStop(0.6, strokeMC(0.05));
       cg.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.beginPath(); ctx.arc(cx, cy, r * 0.42, 0, Math.PI * 2);
       ctx.fillStyle = cg; ctx.fill();

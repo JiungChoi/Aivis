@@ -63,7 +63,7 @@ export function AddEventModal({ startTime: initialStart, endTime: initialEnd, on
             style={{
               width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid rgba(255,255,255,0.12)',
               outline: 'none', color: '#f1f5f9', fontSize: 16, fontWeight: 500,
-              padding: '4px 0 8px', caretColor: '#0a84ff',
+              padding: '4px 0 8px', caretColor: 'var(--accent)',
             }}
           />
         </div>
@@ -77,7 +77,7 @@ export function AddEventModal({ startTime: initialStart, endTime: initialEnd, on
               onChange={(e) => setStartTime(e.target.value)}
               style={{
                 width: '100%', background: '#2c2c2e', border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 8, outline: 'none', color: '#0a84ff', fontSize: 13,
+                borderRadius: 8, outline: 'none', color: 'var(--accent)', fontSize: 13,
                 fontWeight: 500, padding: '6px 10px',
               }}
             />
@@ -90,7 +90,7 @@ export function AddEventModal({ startTime: initialStart, endTime: initialEnd, on
               onChange={(e) => setEndTime(e.target.value)}
               style={{
                 width: '100%', background: '#2c2c2e', border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 8, outline: 'none', color: '#0a84ff', fontSize: 13,
+                borderRadius: 8, outline: 'none', color: 'var(--accent)', fontSize: 13,
                 fontWeight: 500, padding: '6px 10px',
               }}
             />
@@ -106,9 +106,9 @@ export function AddEventModal({ startTime: initialStart, endTime: initialEnd, on
                 onClick={() => setCategory(value)}
                 style={{
                   padding: '4px 10px', borderRadius: 20, fontSize: 11, fontWeight: 500, cursor: 'pointer',
-                  border: `1px solid ${category === value ? 'rgba(10,132,255,0.6)' : 'rgba(255,255,255,0.08)'}`,
-                  background: category === value ? 'rgba(10,132,255,0.2)' : 'rgba(255,255,255,0.04)',
-                  color: category === value ? '#0a84ff' : 'rgba(235,235,245,0.4)',
+                  border: `1px solid ${category === value ? 'var(--accent-border)' : 'rgba(255,255,255,0.08)'}`,
+                  background: category === value ? 'var(--accent-bg)' : 'rgba(255,255,255,0.04)',
+                  color: category === value ? 'var(--accent)' : 'rgba(235,235,245,0.4)',
                   transition: 'all 0.15s ease',
                 }}
               >{label}</button>
@@ -130,8 +130,8 @@ export function AddEventModal({ startTime: initialStart, endTime: initialEnd, on
             style={{
               flex: 1, padding: '10px', borderRadius: 10, fontSize: 13, fontWeight: 600,
               border: 'none', cursor: title.trim() ? 'pointer' : 'default',
-              background: title.trim() ? '#0a84ff' : 'rgba(10,132,255,0.25)',
-              color: title.trim() ? '#fff' : 'rgba(255,255,255,0.3)',
+              background: title.trim() ? 'var(--accent)' : 'var(--accent-bg)',
+              color: title.trim() ? 'var(--on-accent)' : 'var(--text-3)',
               transition: 'background 0.15s ease',
             }}
           >{submitting ? '추가 중...' : '추가'}</button>

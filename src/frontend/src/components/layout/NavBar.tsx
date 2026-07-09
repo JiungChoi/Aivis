@@ -23,32 +23,29 @@ function NavItem({
         display: 'flex',
         alignItems: 'center',
         height: 38,
-        borderRadius: 9,
+        borderRadius: 'var(--r-sm)',
         padding: expanded ? '0 10px' : '0',
         gap: expanded ? 9 : 0,
         justifyContent: expanded ? 'flex-start' : 'center',
-        background: active
-          ? 'linear-gradient(135deg, rgba(10,132,255,0.22) 0%, rgba(94,92,230,0.12) 100%)'
-          : 'transparent',
-        border: active ? '1px solid rgba(10,132,255,0.2)' : '1px solid transparent',
-        color: active ? '#4da3ff' : disabled ? 'rgba(235,235,245,0.2)' : 'rgba(235,235,245,0.45)',
+        background: active ? 'var(--accent-bg)' : 'transparent',
+        border: '1px solid transparent',
+        color: active ? 'var(--accent)' : disabled ? 'var(--text-3)' : 'var(--text-2)',
         cursor: disabled ? 'default' : 'pointer',
-        transition: 'all 0.15s ease',
+        transition: 'background var(--dur-2) var(--ease), color var(--dur-1) var(--ease)',
         flexShrink: 0,
         outline: 'none',
         WebkitAppearance: 'none',
-        boxShadow: active ? '0 2px 12px rgba(10,132,255,0.15), inset 0 1px 0 rgba(255,255,255,0.06)' : 'none',
       } as React.CSSProperties}
       onMouseEnter={e => {
         if (!active && !disabled) {
-          (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)';
-          (e.currentTarget as HTMLElement).style.color = 'rgba(235,235,245,0.75)';
+          (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)';
+          (e.currentTarget as HTMLElement).style.color = 'var(--text-1)';
         }
       }}
       onMouseLeave={e => {
         if (!active) {
           (e.currentTarget as HTMLElement).style.background = 'transparent';
-          (e.currentTarget as HTMLElement).style.color = disabled ? 'rgba(235,235,245,0.2)' : 'rgba(235,235,245,0.45)';
+          (e.currentTarget as HTMLElement).style.color = disabled ? 'var(--text-3)' : 'var(--text-2)';
         }
       }}
     >
@@ -57,18 +54,16 @@ function NavItem({
       </span>
       {expanded && (
         <span style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 4, minWidth: 0 }}>
-          <span style={{ fontSize: 13, fontWeight: active ? 600 : 400, letterSpacing: '-0.1px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <span style={{ fontSize: 13, fontWeight: active ? 600 : 400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {label}
           </span>
           {disabled && (
-            <span style={{ fontSize: 9, color: 'rgba(235,235,245,0.25)', flexShrink: 0, letterSpacing: 0.2 }}>준비 중</span>
+            <span style={{ fontSize: 11, color: 'var(--text-3)', flexShrink: 0 }}>준비 중</span>
           )}
           {badge !== undefined && badge > 0 && (
             <span style={{
-              fontSize: 10, padding: '1px 6px', borderRadius: 99,
-              background: 'linear-gradient(135deg, #0a84ff, #5e5ce6)',
-              color: '#fff', fontWeight: 600, flexShrink: 0,
-              boxShadow: '0 2px 6px rgba(10,132,255,0.4)',
+              fontSize: 11, padding: '1px 6px', borderRadius: 'var(--r-full)',
+              background: 'var(--accent-bg)', color: 'var(--accent)', fontWeight: 500, flexShrink: 0,
             }}>
               {badge}
             </span>
@@ -96,23 +91,12 @@ export default function NavBar({ currentPage, onNavigate }: Props) {
         flexDirection: 'column',
         flexShrink: 0,
         width: sidebarWidth,
-        background: 'linear-gradient(180deg, rgba(14,14,22,0.98) 0%, rgba(10,10,16,0.98) 100%)',
-        backdropFilter: 'blur(40px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-        borderRight: '0.5px solid rgba(255,255,255,0.07)',
-        transition: 'width 0.22s cubic-bezier(0.4,0,0.2,1)',
+        background: 'var(--bg-1)',
+        borderRight: '1px solid var(--border-1)',
+        transition: 'width 0.22s var(--ease)',
         overflow: 'hidden',
-        boxShadow: '1px 0 0 rgba(255,255,255,0.02), 4px 0 24px rgba(0,0,0,0.4)',
       }}
     >
-      {/* Subtle top-left glow */}
-      <div style={{
-        position: 'absolute', top: 0, left: 0,
-        width: '100%', height: 180,
-        background: 'radial-gradient(ellipse at 30% 0%, rgba(10,132,255,0.08) 0%, transparent 70%)',
-        pointerEvents: 'none',
-      }} />
-
       {/* Brand header */}
       <div style={{
         display: 'flex',
@@ -124,26 +108,19 @@ export default function NavBar({ currentPage, onNavigate }: Props) {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
           <div style={{
-            width: 32, height: 32, borderRadius: 9, flexShrink: 0,
-            background: 'linear-gradient(135deg, #0a84ff 0%, #5e5ce6 100%)',
+            width: 32, height: 32, borderRadius: 'var(--r-md)', flexShrink: 0,
+            background: 'var(--accent)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 4px 14px rgba(10,132,255,0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
           }}>
-            <svg style={{ width: 16, height: 16, color: 'white' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg style={{ width: 16, height: 16, color: 'var(--on-accent)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                 d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
             </svg>
           </div>
           {expanded && (
             <div style={{ minWidth: 0 }}>
-              <div style={{
-                fontSize: 14, fontWeight: 700, letterSpacing: '-0.4px', lineHeight: 1,
-                background: 'linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.75) 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}>AIVIS</div>
-              <div style={{ fontSize: 10, color: 'rgba(235,235,245,0.3)', marginTop: 2.5 }}>AI Assistant</div>
+              <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1, color: 'var(--text-1)' }}>AIVIS</div>
+              <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 2.5 }}>AI Assistant</div>
             </div>
           )}
         </div>
@@ -152,14 +129,14 @@ export default function NavBar({ currentPage, onNavigate }: Props) {
           onClick={() => setExpanded(v => !v)}
           title={expanded ? '접기' : '펼치기'}
           style={{
-            width: 22, height: 22, borderRadius: 6, flexShrink: 0,
+            width: 22, height: 22, borderRadius: 'var(--r-sm)', flexShrink: 0,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             background: 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(255,255,255,0.06)',
-            color: 'rgba(235,235,245,0.3)', cursor: 'pointer',
+            border: '1px solid var(--border-1)',
+            color: 'var(--text-3)', cursor: 'pointer',
             opacity: expanded ? 1 : 0,
             pointerEvents: expanded ? 'auto' : 'none',
-            transition: 'opacity 0.15s ease',
+            transition: 'opacity var(--dur-2) var(--ease)',
           }}
         >
           <svg style={{ width: 11, height: 11 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -169,11 +146,7 @@ export default function NavBar({ currentPage, onNavigate }: Props) {
       </div>
 
       {/* Top separator */}
-      <div style={{
-        height: '0.5px',
-        background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 30%, rgba(255,255,255,0.08) 70%, transparent 100%)',
-        margin: '0 12px 10px',
-      }} />
+      <div style={{ height: 1, background: 'var(--border-1)', margin: '0 12px 10px' }} />
 
       {/* Nav items */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '0 8px', gap: 2 }}>
@@ -182,10 +155,10 @@ export default function NavBar({ currentPage, onNavigate }: Props) {
           <button
             onClick={() => setExpanded(true)}
             style={{
-              width: '100%', height: 30, borderRadius: 7, marginBottom: 6,
+              width: '100%', height: 30, borderRadius: 'var(--r-sm)', marginBottom: 6,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               background: 'rgba(255,255,255,0.04)', border: 'none',
-              color: 'rgba(235,235,245,0.35)', cursor: 'pointer',
+              color: 'var(--text-3)', cursor: 'pointer',
             }}
           >
             <svg style={{ width: 11, height: 11 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -215,11 +188,7 @@ export default function NavBar({ currentPage, onNavigate }: Props) {
           </svg>
         </NavItem>
 
-        <div style={{
-          height: '0.5px',
-          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)',
-          margin: '5px 4px',
-        }} />
+        <div style={{ height: 1, background: 'var(--border-1)', margin: '5px 4px' }} />
 
         <NavItem active={currentPage === 'memory'} expanded={expanded} label="메모리" onClick={() => onNavigate('memory')}>
           <svg style={{ width: 15, height: 15 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -239,11 +208,7 @@ export default function NavBar({ currentPage, onNavigate }: Props) {
 
       {/* Bottom: Settings */}
       <div style={{ display: 'flex', flexDirection: 'column', padding: '0 8px 14px', gap: 2 }}>
-        <div style={{
-          height: '0.5px',
-          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)',
-          margin: '0 4px 8px',
-        }} />
+        <div style={{ height: 1, background: 'var(--border-1)', margin: '0 4px 8px' }} />
         <NavItem active={currentPage === 'settings'} expanded={expanded} label="설정" onClick={() => onNavigate('settings')}>
           <svg style={{ width: 15, height: 15 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}

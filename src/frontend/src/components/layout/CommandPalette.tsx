@@ -36,18 +36,13 @@ const TYPE_LABELS: Record<ResultType, string> = {
   memory: '기억', note: '노트', todo: '할 일', schedule: '일정', page: '페이지',
 };
 
-const TYPE_COLORS: Record<ResultType, string> = {
-  memory: '#3b82f6', note: '#a855f7', todo: '#22d3ee', schedule: '#fb923c', page: '#9ca3af',
-};
-
 function ResultIcon({ type }: { type: ResultType }) {
-  const color = TYPE_COLORS[type];
   return (
     <div style={{
-      width: 30, height: 30, borderRadius: 8, flexShrink: 0,
-      background: `${color}22`, border: `1px solid ${color}44`,
+      width: 30, height: 30, borderRadius: 'var(--r-sm)', flexShrink: 0,
+      background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border-1)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      color,
+      color: 'var(--text-2)',
     }}>
       <svg style={{ width: 14, height: 14 }} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
         {type === 'memory' && (
@@ -174,7 +169,7 @@ export default function CommandPalette({ open, onClose, onNavigate }: CommandPal
     <div
       style={{
         position: 'fixed', inset: 0, zIndex: 9999,
-        background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)',
+        background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
         display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
         paddingTop: 96,
       }}
@@ -183,10 +178,10 @@ export default function CommandPalette({ open, onClose, onNavigate }: CommandPal
       <div
         style={{
           width: 560, maxWidth: '92vw',
-          background: 'linear-gradient(180deg, #1a1a1f 0%, #15151a 100%)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: 16,
-          boxShadow: '0 28px 96px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04)',
+          background: 'var(--bg-3)',
+          border: '1px solid var(--border-2)',
+          borderRadius: 'var(--r-lg)',
+          boxShadow: 'var(--shadow-modal)',
           overflow: 'hidden',
         }}
         onClick={e => e.stopPropagation()}
@@ -195,9 +190,9 @@ export default function CommandPalette({ open, onClose, onNavigate }: CommandPal
         <div style={{
           display: 'flex', alignItems: 'center', gap: 12,
           padding: '14px 18px',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          borderBottom: '1px solid var(--border-1)',
         }}>
-          <svg style={{ width: 16, height: 16, color: '#6b7280', flexShrink: 0 }} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+          <svg style={{ width: 16, height: 16, color: 'var(--text-3)', flexShrink: 0 }} fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
             <circle cx="11" cy="11" r="8" />
             <path strokeLinecap="round" d="m21 21-4.35-4.35" />
           </svg>
@@ -209,21 +204,20 @@ export default function CommandPalette({ open, onClose, onNavigate }: CommandPal
             onChange={e => { setQuery(e.target.value); setActiveIndex(0); }}
             style={{
               flex: 1, background: 'transparent', border: 'none', outline: 'none',
-              color: 'white', fontSize: 14, letterSpacing: '-0.01em',
-              fontFamily: 'system-ui, -apple-system, sans-serif',
+              color: 'var(--text-1)', fontSize: 14,
             }}
           />
           <span style={{
-            fontSize: 9, color: '#6b7280', padding: '3px 7px',
-            background: 'rgba(255,255,255,0.05)', borderRadius: 5,
-            letterSpacing: '0.05em', textTransform: 'uppercase',
+            fontSize: 11, color: 'var(--text-3)', padding: '3px 7px',
+            background: 'rgba(255,255,255,0.06)', borderRadius: 'var(--r-sm)',
+            letterSpacing: '0.05em',
           }}>ESC</span>
         </div>
 
         {/* Results */}
         <div style={{ maxHeight: 440, overflowY: 'auto', padding: 6 }}>
           {results.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px 16px', color: '#6b7280', fontSize: 12 }}>
+            <div style={{ textAlign: 'center', padding: '40px 16px', color: 'var(--text-3)', fontSize: 13 }}>
               검색 결과가 없어요
             </div>
           ) : (
@@ -234,35 +228,28 @@ export default function CommandPalette({ open, onClose, onNavigate }: CommandPal
                 onClick={() => { onNavigate(r.page); onClose(); }}
                 onMouseEnter={() => setActiveIndex(i)}
                 style={{
-                  width: '100%', padding: '10px 12px', borderRadius: 9,
+                  width: '100%', padding: '10px 12px', borderRadius: 'var(--r-sm)',
                   display: 'flex', alignItems: 'center', gap: 12,
-                  background: i === activeIndex ? 'rgba(10,132,255,0.16)' : 'transparent',
+                  background: i === activeIndex ? 'var(--accent-bg)' : 'transparent',
                   border: 'none', cursor: 'pointer', textAlign: 'left',
-                  transition: 'background 0.1s ease',
+                  transition: 'background var(--dur-1) var(--ease)',
                   marginBottom: 2,
                 }}
               >
                 <ResultIcon type={r.type} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{
-                    color: 'rgba(235,235,245,0.95)', fontSize: 13, fontWeight: 500,
+                    color: 'var(--text-1)', fontSize: 13, fontWeight: 500,
                     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                    fontFamily: 'system-ui, -apple-system, sans-serif',
                   }}>{r.title}</div>
                   {r.subtitle && (
                     <div style={{
-                      color: 'rgba(235,235,245,0.4)', fontSize: 11, marginTop: 2,
+                      color: 'var(--text-3)', fontSize: 12, marginTop: 2,
                       overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                      fontFamily: 'system-ui, -apple-system, sans-serif',
                     }}>{r.subtitle}</div>
                   )}
                 </div>
-                <span style={{
-                  fontSize: 9, color: TYPE_COLORS[r.type],
-                  padding: '3px 8px', background: `${TYPE_COLORS[r.type]}1a`,
-                  border: `1px solid ${TYPE_COLORS[r.type]}33`,
-                  borderRadius: 5, letterSpacing: '0.04em', flexShrink: 0,
-                }}>{TYPE_LABELS[r.type]}</span>
+                <span className="ui-badge ui-badge-neutral" style={{ flexShrink: 0 }}>{TYPE_LABELS[r.type]}</span>
               </button>
             ))
           )}
@@ -270,16 +257,15 @@ export default function CommandPalette({ open, onClose, onNavigate }: CommandPal
 
         {/* Footer */}
         <div style={{
-          padding: '8px 16px', borderTop: '1px solid rgba(255,255,255,0.06)',
+          padding: '8px 16px', borderTop: '1px solid var(--border-1)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          background: 'rgba(0,0,0,0.3)',
         }}>
-          <div style={{ display: 'flex', gap: 16, color: '#6b7280', fontSize: 10 }}>
+          <div style={{ display: 'flex', gap: 16, color: 'var(--text-3)', fontSize: 11 }}>
             <span>↑↓ 탐색</span>
             <span>↵ 이동</span>
             <span>esc 닫기</span>
           </div>
-          <span style={{ fontSize: 10, color: '#4b5563', letterSpacing: '0.05em' }}>AIVIS 전역 검색</span>
+          <span style={{ fontSize: 11, color: 'var(--text-3)' }}>AIVIS 전역 검색</span>
         </div>
       </div>
     </div>

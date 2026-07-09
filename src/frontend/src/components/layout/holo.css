@@ -1,0 +1,269 @@
+/* ══════════════════════════════════════════════════════════════
+   HoloJarvis / FloatingCharacter / Voice / Analytics keyframes.
+   Extracted from index.css (2026-07-04). Content unchanged — these
+   drive the decorative HUD orb, floating character, voice vortex and
+   analytics knowledge-map animations. Imported by HoloJarvis.tsx so
+   Vite bundles them app-wide.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Hologram Jarvis animations ───────────────────────────── */
+
+@keyframes holo-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-5px); }
+}
+
+@keyframes holo-ring-cw {
+  from { transform: rotateX(72deg) rotateZ(0deg); }
+  to   { transform: rotateX(72deg) rotateZ(360deg); }
+}
+
+@keyframes holo-ring-ccw {
+  from { transform: rotateX(72deg) rotateZ(0deg); }
+  to   { transform: rotateX(72deg) rotateZ(-360deg); }
+}
+
+@keyframes holo-ring-tilt {
+  from { transform: rotateX(55deg) rotateY(30deg) rotateZ(0deg); }
+  to   { transform: rotateX(55deg) rotateY(30deg) rotateZ(360deg); }
+}
+
+@keyframes holo-scan {
+  0%   { top: -10%; opacity: 0; }
+  10%  { opacity: 0.5; }
+  90%  { opacity: 0.3; }
+  100% { top: 110%; opacity: 0; }
+}
+
+@keyframes holo-flicker {
+  0%,100%     { opacity: 1; }
+  92%         { opacity: 1; }
+  93%         { opacity: 0.4; }
+  94%         { opacity: 1; }
+  96%         { opacity: 0.6; }
+  97%         { opacity: 1; }
+  98%         { opacity: 0.2; }
+  99%         { opacity: 1; }
+}
+
+@keyframes holo-pulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.08); }
+}
+
+@keyframes holo-eye-blink {
+  0%, 90%, 100% { scaleY: 1; }
+  95%            { transform: scaleY(0.1); }
+}
+
+@keyframes holo-beam {
+  0%, 100% { opacity: 0.15; }
+  50%      { opacity: 0.35; }
+}
+
+@keyframes holo-hex-rotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes holo-data-scroll {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-50%); }
+}
+
+@keyframes holo-code-rise {
+  0% {
+    transform: translateY(148px);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.9;
+  }
+  76% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(-188px);
+    opacity: 0;
+  }
+}
+
+@keyframes holo-title-hover {
+  0%, 100% {
+    transform: translateX(-50%) perspective(280px) rotateX(58deg) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) perspective(280px) rotateX(58deg) translateY(-5px);
+  }
+}
+
+@keyframes holo-orbit {
+  from { transform: rotate(0deg) translateX(22px) rotate(0deg); }
+  to   { transform: rotate(360deg) translateX(22px) rotate(-360deg); }
+}
+
+@keyframes holo-orbit-r {
+  from { transform: rotate(0deg) translateX(16px) rotate(0deg); }
+  to   { transform: rotate(-360deg) translateX(16px) rotate(360deg); }
+}
+
+@keyframes holo-vortex {
+  from { transform: perspective(600px) rotateX(78deg) rotate(0deg); }
+  to   { transform: perspective(600px) rotateX(78deg) rotate(360deg); }
+}
+
+@keyframes holo-vortex-ccw {
+  from { transform: perspective(600px) rotateX(78deg) rotate(0deg); }
+  to   { transform: perspective(600px) rotateX(78deg) rotate(-360deg); }
+}
+
+@keyframes holo-vortex-ring {
+  from { transform: perspective(600px) rotateX(75deg) rotate(0deg) scaleX(1); }
+  to   { transform: perspective(600px) rotateX(75deg) rotate(360deg) scaleX(1); }
+}
+
+@keyframes holo-vortex-particle {
+  0%   { transform: rotate(0deg)   translateX(var(--r)) rotate(0deg);   opacity: 1; }
+  100% { transform: rotate(360deg) translateX(var(--r)) rotate(-360deg); opacity: 1; }
+}
+
+@keyframes holo-spark-up {
+  0%   { transform: translateX(var(--sx)) translateY(0px);    opacity: 0.9; }
+  100% { transform: translateX(var(--sx)) translateY(-80px);  opacity: 0; }
+}
+
+@keyframes holo-vortex-pulse {
+  0%, 100% { opacity: 0.6; transform: perspective(600px) rotateX(78deg) scale(1); }
+  50%      { opacity: 1;   transform: perspective(600px) rotateX(78deg) scale(1.06); }
+}
+
+@keyframes holo-ring-cw-lg {
+  from { transform: rotateX(72deg) rotateZ(0deg); }
+  to   { transform: rotateX(72deg) rotateZ(360deg); }
+}
+
+@keyframes holo-ring-ccw-lg {
+  from { transform: rotateX(72deg) rotateZ(0deg); }
+  to   { transform: rotateX(72deg) rotateZ(-360deg); }
+}
+
+@keyframes holo-orbit-lg {
+  from { transform: rotate(0deg) translateX(66px) rotate(0deg); }
+  to   { transform: rotate(360deg) translateX(66px) rotate(-360deg); }
+}
+
+@keyframes holo-orbit-lg-r {
+  from { transform: rotate(0deg) translateX(48px) rotate(0deg); }
+  to   { transform: rotate(-360deg) translateX(48px) rotate(360deg); }
+}
+
+@keyframes holo-orbit-lg-mid {
+  from { transform: rotate(120deg) translateX(56px) rotate(-120deg); }
+  to   { transform: rotate(480deg) translateX(56px) rotate(-480deg); }
+}
+
+@keyframes holo-eye-cw {
+  from { transform: perspective(320px) rotateX(72deg) rotateZ(0deg); }
+  to   { transform: perspective(320px) rotateX(72deg) rotateZ(360deg); }
+}
+
+@keyframes holo-eye-ccw {
+  from { transform: perspective(320px) rotateX(72deg) rotateZ(0deg); }
+  to   { transform: perspective(320px) rotateX(72deg) rotateZ(-360deg); }
+}
+
+@keyframes holo-eye-tilt {
+  from { transform: perspective(320px) rotateX(55deg) rotateY(22deg) rotateZ(0deg); }
+  to   { transform: perspective(320px) rotateX(55deg) rotateY(22deg) rotateZ(360deg); }
+}
+
+@keyframes holo-swirl-cw {
+  from { transform: perspective(320px) rotateX(80deg) rotateZ(0deg); }
+  to   { transform: perspective(320px) rotateX(80deg) rotateZ(360deg); }
+}
+
+@keyframes holo-selected-pulse {
+  0%, 100% { box-shadow: 0 0 0 2px #60a5fa80, 0 0 12px #3b82f660; }
+  50%       { box-shadow: 0 0 0 3px #60a5facc, 0 0 24px #3b82f6aa; }
+}
+
+@keyframes voice-mic-pulse {
+  0%, 100% { box-shadow: 0 0 16px #ff330088, 0 0 40px #ff330044; transform: scale(1); }
+  50%      { box-shadow: 0 0 32px #ff3300,   0 0 80px #ff330066; transform: scale(1.12); }
+}
+
+@keyframes voice-vortex-cw {
+  from { transform: perspective(420px) rotateX(72deg) rotateZ(0deg); }
+  to   { transform: perspective(420px) rotateX(72deg) rotateZ(360deg); }
+}
+
+@keyframes voice-vortex-ccw {
+  from { transform: perspective(420px) rotateX(72deg) rotateZ(0deg); }
+  to   { transform: perspective(420px) rotateX(72deg) rotateZ(-360deg); }
+}
+
+@keyframes voice-ember {
+  0%   { transform: translateX(var(--ex)) translateY(0px);   opacity: 0.9; }
+  100% { transform: translateX(calc(var(--ex) + var(--drift))) translateY(-130px); opacity: 0; }
+}
+
+/* ── Floating Character animations ────────────────────────── */
+
+@keyframes char-bob {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-5px); }
+}
+
+@keyframes char-shadow-pulse {
+  0%, 100% { opacity: 0.3; transform: scaleX(1); }
+  50%       { opacity: 0.15; transform: scaleX(0.85); }
+}
+
+@keyframes bubble-pop-in {
+  0%   { opacity: 0; transform: scale(0.7) translateY(6px); }
+  70%  { transform: scale(1.04) translateY(-1px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes bubble-pop-out {
+  0%   { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.8) translateY(4px); }
+}
+
+@keyframes char-idle-blink {
+  0%, 90%, 100% { transform: scaleY(1); }
+  95%            { transform: scaleY(0.08); }
+}
+
+@keyframes char-glow-pulse {
+  0%, 100% { opacity: 0.25; }
+  50%       { opacity: 0.5; }
+}
+
+@keyframes char-talk-head {
+  0%, 100% { transform: rotate(0deg); }
+  20%       { transform: rotate(-4deg); }
+  60%       { transform: rotate(3deg); }
+}
+
+@keyframes char-think-sway {
+  0%, 100% { transform: translateX(0px); }
+  50%       { transform: translateX(2px); }
+}
+
+@keyframes char-walk-bounce {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-3px); }
+}
+
+@keyframes char-wave-arm {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  30%       { transform: translateY(-2px) rotate(15deg); }
+  70%       { transform: translateY(-1px) rotate(-10deg); }
+}
+
+/* ── Analytics knowledge map ──────────────────────────────── */
+
+@keyframes analytics-dash {
+  to { stroke-dashoffset: -20; }
+}

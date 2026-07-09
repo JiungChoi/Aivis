@@ -326,25 +326,22 @@ export function ScheduleTimeline({
       className="overflow-y-auto flex-shrink-0"
       // height:100% + minHeight:0 ties the column to the row height so the 24h
       // timeline (1344px) scrolls internally instead of overflowing & being clipped.
-      style={{ width, height: '100%', minHeight: 0, borderRight: '1px solid rgba(255,255,255,0.05)', position: 'relative' }}
+      style={{ width, height: '100%', minHeight: 0, borderRight: '1px solid var(--border-1)', position: 'relative' }}
     >
       {/* Sticky header */}
       <div style={{
         position: 'sticky', top: 0, zIndex: 20,
-        background: 'linear-gradient(180deg, rgba(8,8,18,0.92) 0%, rgba(4,4,12,0.85) 100%)',
-        backdropFilter: 'blur(24px)',
-        WebkitBackdropFilter: 'blur(24px)',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        background: 'var(--bg-1)',
+        borderBottom: '1px solid var(--border-1)',
         padding: '9px 10px 8px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <span style={{
-          color: 'rgba(235,235,245,0.35)',
-          fontWeight: 600,
-          fontSize: 11,
+          color: 'var(--text-3)',
+          fontWeight: 500,
+          fontSize: 12,
           letterSpacing: '0.05em',
           textTransform: 'uppercase',
-          fontFamily: 'system-ui, -apple-system, sans-serif',
         }}>오늘의 일정</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
           {/* Feature 1: AI 일정 추천 버튼 */}
@@ -354,12 +351,12 @@ export function ScheduleTimeline({
             title="AI가 오늘 하루 일정을 추천하고 일괄 생성합니다"
             style={{
               display: 'flex', alignItems: 'center', gap: 3,
-              padding: '3px 7px', borderRadius: 10, fontSize: 9, fontWeight: 500,
+              padding: '3px 8px', borderRadius: 'var(--r-sm)', fontSize: 11, fontWeight: 500,
               cursor: aiScheduleLoading ? 'default' : 'pointer',
-              border: '1px solid rgba(10,132,255,0.3)',
-              background: aiScheduleLoading ? 'rgba(10,132,255,0.06)' : 'rgba(10,132,255,0.12)',
-              color: aiScheduleLoading ? 'rgba(10,132,255,0.4)' : '#0a84ff',
-              transition: 'all 0.15s ease',
+              border: '1px solid var(--accent-border)',
+              background: 'var(--accent-bg)',
+              color: 'var(--accent)',
+              transition: 'background var(--dur-2) var(--ease)',
               opacity: aiScheduleLoading ? 0.6 : 1,
             }}
           >
@@ -372,11 +369,11 @@ export function ScheduleTimeline({
             title="현재 시각으로 스크롤"
             aria-label="현재 시각으로 스크롤"
             style={{
-              width: 22, height: 22, borderRadius: '50%',
+              width: 22, height: 22, borderRadius: 'var(--r-full)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'rgba(239,68,68,0.12)',
-              border: '1px solid rgba(239,68,68,0.3)',
-              color: '#ef4444',
+              background: 'var(--danger-bg)',
+              border: '1px solid var(--danger-border)',
+              color: 'var(--danger)',
               cursor: 'pointer',
               padding: 0,
             }}
@@ -393,11 +390,11 @@ export function ScheduleTimeline({
               onOpenAddModal(base, Math.min(base + 60, 24 * 60));
             }}
             style={{
-              width: 22, height: 22, borderRadius: '50%',
+              width: 22, height: 22, borderRadius: 'var(--r-full)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'rgba(96,165,250,0.14)',
-              border: '1px solid rgba(96,165,250,0.3)',
-              color: '#64b5ff',
+              background: 'var(--accent-bg)',
+              border: '1px solid var(--accent-border)',
+              color: 'var(--accent)',
               fontSize: 15, lineHeight: 1, cursor: 'pointer',
             }}
           >+</button>
@@ -438,12 +435,11 @@ export function ScheduleTimeline({
                 }}
                 style={{
                   position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)',
-                  width: 16, height: 16, borderRadius: '50%',
+                  width: 16, height: 16, borderRadius: 'var(--r-full)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: 'rgba(10,132,255,0.2)', border: '1px solid rgba(10,132,255,0.45)',
-                  color: '#0a84ff', fontSize: 13, lineHeight: 1,
+                  background: 'var(--accent-bg)', border: '1px solid var(--accent-border)',
+                  color: 'var(--accent)', fontSize: 13, lineHeight: 1,
                   cursor: 'pointer', zIndex: 10,
-                  boxShadow: '0 0 6px rgba(10,132,255,0.3)',
                 }}
               >+</button>
             )}
@@ -455,18 +451,18 @@ export function ScheduleTimeline({
           <div key={h} style={{ position: 'absolute', left: 0, right: 0, top: h * 2 * SLOT_H }}>
             {h < 24 && (
               <div style={{ position: 'absolute', left: 0, width: 26, height: SLOT_H, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 4 }}>
-                <span style={{ fontSize: 9, color: 'rgba(235,235,245,0.25)', letterSpacing: 0 }}>{String(h).padStart(2, '0')}</span>
+                <span className="tabular" style={{ fontSize: 11, color: 'var(--text-3)', letterSpacing: 0 }}>{String(h).padStart(2, '0')}</span>
               </div>
             )}
-            <div style={{ position: 'absolute', left: 28, right: 0, top: 0, height: 1, background: h === 0 ? 'transparent' : 'rgba(255,255,255,0.05)' }} />
-            {h < 24 && <div style={{ position: 'absolute', left: 28, right: 0, top: SLOT_H, height: 0, borderTop: '1px dashed rgba(255,255,255,0.025)' }} />}
+            <div style={{ position: 'absolute', left: 28, right: 0, top: 0, height: 1, background: h === 0 ? 'transparent' : 'var(--border-1)' }} />
+            {h < 24 && <div style={{ position: 'absolute', left: 28, right: 0, top: SLOT_H, height: 0, borderTop: '1px dashed var(--border-1)' }} />}
           </div>
         ))}
 
         {/* Current time indicator */}
         <div style={{ position: 'absolute', left: 26, right: 0, top: minsToTop(nowMinutes), zIndex: 5, pointerEvents: 'none' }}>
-          <div style={{ position: 'absolute', left: -4, top: -3, width: 6, height: 6, borderRadius: '50%', background: '#ef4444', boxShadow: '0 0 6px rgba(239,68,68,0.8)' }} />
-          <div style={{ height: 1, background: 'linear-gradient(90deg, #ef4444 0%, rgba(239,68,68,0.15) 100%)', marginLeft: 2 }} />
+          <div style={{ position: 'absolute', left: -4, top: -3, width: 6, height: 6, borderRadius: 'var(--r-full)', background: 'var(--danger)' }} />
+          <div style={{ height: 1, background: 'var(--danger)', opacity: 0.5, marginLeft: 2 }} />
         </div>
 
         {/* Events */}
@@ -497,11 +493,10 @@ export function ScheduleTimeline({
               style={{
                 position: 'absolute',
                 top: topPx, left: leftCalc, width: widthCalc, height: heightPx,
-                borderRadius: 8,
+                borderRadius: 'var(--r-sm)',
                 background: colors.bg,
                 border: `1px solid ${colors.border}`,
                 borderLeft: `4px solid ${colors.text}`,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
                 overflow: 'hidden', zIndex: 3, userSelect: 'none',
                 cursor: 'grab',
               }}
@@ -515,15 +510,13 @@ export function ScheduleTimeline({
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
-                  letterSpacing: '-0.01em',
                 }}>{item.title}</div>
                 {heightPx >= SLOT_H * 1.5 && (
-                  <div style={{
-                    fontSize: 9,
+                  <div className="tabular" style={{
+                    fontSize: 11,
                     color: colors.text,
-                    opacity: 0.5,
+                    opacity: 0.6,
                     marginTop: 2,
-                    letterSpacing: '0.01em',
                   }}>{item.startTime}{item.endTime ? ` – ${item.endTime}` : ''}</div>
                 )}
               </div>
@@ -532,7 +525,7 @@ export function ScheduleTimeline({
                 onMouseDown={(e) => handleEventResizeStart(e, item)}
                 style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 10, cursor: 'ns-resize', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
-                <div style={{ width: 18, height: 2, borderRadius: 1, background: colors.border, opacity: 0.8 }} />
+                <div style={{ width: 18, height: 2, borderRadius: 'var(--r-full)', background: colors.border, opacity: 0.8 }} />
               </div>
             </div>
           );
@@ -546,9 +539,9 @@ export function ScheduleTimeline({
               left: 30, right: 4,
               top: dragPreview.startSlot * SLOT_H + 1,
               height: (dragPreview.currentSlot - dragPreview.startSlot + 1) * SLOT_H - 2,
-              borderRadius: 7,
-              background: 'rgba(10,132,255,0.25)',
-              border: '1px solid rgba(10,132,255,0.5)',
+              borderRadius: 'var(--r-sm)',
+              background: 'var(--accent-bg)',
+              border: '1px solid var(--accent-border)',
               zIndex: 4,
               pointerEvents: 'none',
             }}
@@ -557,8 +550,8 @@ export function ScheduleTimeline({
 
         {scheduleError && (
           <div style={{ position: 'absolute', top: minsToTop(8 * 60) + 20, left: 32, right: 4, textAlign: 'center' }}>
-            <div style={{ color: '#f87171', fontSize: 10, marginBottom: 4 }}>일정을 불러오지 못했습니다.</div>
-            <button onClick={onRetry} style={{ fontSize: 10, color: '#64b5ff', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}>재시도</button>
+            <div style={{ color: 'var(--danger)', fontSize: 12, marginBottom: 4 }}>일정을 불러오지 못했습니다.</div>
+            <button onClick={onRetry} style={{ fontSize: 12, color: 'var(--accent)', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}>재시도</button>
           </div>
         )}
       </div>
@@ -580,18 +573,15 @@ export function ScheduleTimeline({
             height: deleteZoneHover ? 64 : 52,
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
             margin: '0 6px 8px',
-            borderRadius: 12,
-            border: `1.5px dashed ${deleteZoneHover ? 'rgba(239,68,68,0.85)' : 'rgba(239,68,68,0.4)'}`,
-            background: deleteZoneHover ? 'rgba(239,68,68,0.18)' : 'rgba(239,68,68,0.07)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
-            color: deleteZoneHover ? '#fca5a5' : 'rgba(248,113,113,0.7)',
+            borderRadius: 'var(--r-lg)',
+            border: `1px dashed ${deleteZoneHover ? 'var(--danger)' : 'var(--danger-border)'}`,
+            background: 'var(--danger-bg)',
+            color: 'var(--danger)',
             fontSize: 12, fontWeight: 600,
-            transition: 'all 0.15s ease',
-            boxShadow: deleteZoneHover ? '0 0 20px rgba(239,68,68,0.3)' : 'none',
+            transition: 'background var(--dur-2) var(--ease), border-color var(--dur-2) var(--ease), height var(--dur-2) var(--ease)',
           }}
         >
-          <svg style={{ width: 16, height: 16, transform: deleteZoneHover ? 'scale(1.15)' : 'scale(1)', transition: 'transform 0.15s ease' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg style={{ width: 16, height: 16, transition: 'transform var(--dur-2) var(--ease)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
           </svg>
           {deleteZoneHover ? '놓으면 일정이 삭제됩니다' : '여기로 끌어다 놓아 삭제'}

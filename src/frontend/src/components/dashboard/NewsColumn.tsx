@@ -27,7 +27,7 @@ export function NewsColumn({ news, newsTab, onSelectTab }: NewsColumnProps) {
           <button key={tab} onClick={() => onSelectTab(tab)}
             className="flex-shrink-0 text-[11px] px-0.5 pb-2 pt-0.5 transition-colors relative"
             style={{
-              color: newsTab === tab ? '#64b5ff' : 'rgba(235,235,245,0.4)',
+              color: newsTab === tab ? 'var(--accent)' : 'rgba(235,235,245,0.4)',
               fontWeight: newsTab === tab ? 600 : 400,
             }}
             onMouseEnter={(e) => { if (newsTab !== tab) (e.currentTarget as HTMLElement).style.color = 'rgba(235,235,245,0.7)'; }}
@@ -37,7 +37,7 @@ export function NewsColumn({ news, newsTab, onSelectTab }: NewsColumnProps) {
             {newsTab === tab && (
               <span style={{
                 position: 'absolute', left: 0, right: 0, bottom: -1, height: 2,
-                borderRadius: 2, background: '#0a84ff', boxShadow: '0 0 6px rgba(10,132,255,0.5)',
+                borderRadius: 2, background: 'var(--accent)',
               }} />
             )}
           </button>
@@ -65,7 +65,7 @@ export function NewsColumn({ news, newsTab, onSelectTab }: NewsColumnProps) {
               onMouseEnter={e => {
                 const el = e.currentTarget as HTMLElement;
                 el.style.borderColor = 'rgba(255,255,255,0.05)';
-                el.style.borderLeftColor = '#0a84ff';
+                el.style.borderLeftColor = 'var(--accent)';
                 el.style.borderLeftWidth = '2px';
                 el.style.boxShadow = '0 2px 12px rgba(0,0,0,0.35)';
               }}
