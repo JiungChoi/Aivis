@@ -1,7 +1,16 @@
 # UI 구체화 계획 (UI Refinement Plan)
 
+> **⚠️ 방향 갱신 (2026-07): 정식 디자인 방향은 「AIVIS Design Tokens v1 — 다크 프리미엄」이다.**
+> 절제된 단색 팔레트 · 보더 중심 레이어링 · 미세 인터랙션(Linear/Vercel풍). 그라디언트·컬러 글로우·네온·이모지 아이콘 금지.
+> 토큰/규칙 단일 출처: `.claude/skills/frontend-design/SKILL.md` + `src/frontend/src/index.css` `:root`.
+> **아래 「JARVIS풍 HUD · 글래스모피즘 · 시안/블루 액센트」 시안은 superseded(폐기)** —
+> 단, 좌측 홀로그램(HoloJarvis/WireframeGlobe) 및 캐릭터 아바타는 의도된 아트 요소로 예외 유지(색은 --accent 파생, 글로우 알파 감쇠).
+>
+> ---
+> _아래는 2026-06 원본 계획(히스토리 보존용)._
+>
 > 작성: 2026-06-07 · 대상: Electron 데스크톱(다크/홀로그램 테마)
-> 디자인 방향: **JARVIS풍 HUD · 글래스모피즘 · 차분한 다크 베이스 + 시안/블루 액센트**
+> 디자인 방향: ~~**JARVIS풍 HUD · 글래스모피즘 · 차분한 다크 베이스 + 시안/블루 액센트**~~ (superseded)
 > 진행: 각 항목 `feature/ui-*` 브랜치 ([git-flow](../06_process/git-flow.md) 준수). 토큰화는 [refactoring-plan A3](../03_architecture/refactoring-plan.md) 와 연계.
 
 ---
