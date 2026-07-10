@@ -78,18 +78,17 @@ export default function TodoPage() {
   const doneCount = todos.filter(t => t.isCompleted).length;
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden" style={{ background: '#000000' }}>
+    <div className="flex-1 flex flex-col overflow-hidden" style={{ background: 'var(--bg-0)' }}>
       {/* ── 헤더 ── */}
       <div className="flex items-center justify-between px-6 flex-shrink-0"
         style={{
           height: 52,
-          borderBottom: '1px solid rgba(255,255,255,0.05)',
-          background: '#000000',
-          boxShadow: '0 1px 0 rgba(255,255,255,0.03), 0 4px 16px rgba(0,0,0,0.3)',
+          borderBottom: '1px solid var(--border-1)',
+          background: 'var(--bg-1)',
         }}>
         <div>
-          <div style={{ color: 'white', fontWeight: 700, fontSize: 14, letterSpacing: '-0.02em' }}>할 일</div>
-          <div style={{ color: 'rgba(235,235,245,0.25)', fontSize: 11, marginTop: 1 }}>
+          <div style={{ color: 'var(--text-1)', fontWeight: 700, fontSize: 14, letterSpacing: '-0.01em' }}>할 일</div>
+          <div style={{ color: 'var(--text-3)', fontSize: 11, marginTop: 1 }}>
             {todos.length > 0 ? `${doneCount} / ${todos.length} 완료` : '오늘의 할 일을 추가해보세요'}
           </div>
         </div>
@@ -98,13 +97,13 @@ export default function TodoPage() {
           aria-label={showForm ? '할 일 추가 양식 닫기' : '할 일 추가 양식 열기'}
           aria-expanded={showForm}
           style={{
-            width: 30, height: 30, borderRadius: '50%',
+            width: 30, height: 30, borderRadius: 'var(--r-full)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: showForm ? 'rgba(255,255,255,0.06)' : 'rgba(96,165,250,0.14)',
-            border: `1px solid ${showForm ? 'rgba(255,255,255,0.08)' : 'rgba(96,165,250,0.3)'}`,
-            color: showForm ? '#6b7280' : '#64b5ff',
+            background: showForm ? 'var(--bg-3)' : 'var(--accent-bg)',
+            border: `1px solid ${showForm ? 'var(--border-1)' : 'var(--accent-border)'}`,
+            color: showForm ? 'var(--text-3)' : 'var(--accent)',
             fontSize: 20, lineHeight: 1, cursor: 'pointer',
-            transition: 'all 0.15s ease',
+            transition: 'all var(--dur-2) var(--ease)',
           }}
         >
           {showForm ? '×' : '+'}
@@ -137,10 +136,10 @@ export default function TodoPage() {
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className="text-[11px] px-3 py-1 rounded-lg transition-colors"
+                className="text-[11px] px-3 py-1 transition-colors"
                 style={filter === f
-                  ? { background: '#2c2c2e', color: '#e2e8f0' }
-                  : { color: '#4b5563' }
+                  ? { background: 'var(--bg-3)', color: 'var(--text-1)', borderRadius: 'var(--r-sm)' }
+                  : { color: 'var(--text-3)', borderRadius: 'var(--r-sm)' }
                 }
               >
                 {f === 'all' ? `전체 ${todos.length}` : f === 'active' ? `진행 중 ${todos.length - doneCount}` : `완료 ${doneCount}`}
@@ -151,48 +150,47 @@ export default function TodoPage() {
 
         {/* List */}
         {loading ? (
-          <div className="text-gray-600 text-[12px] text-center py-16">불러오는 중...</div>
+          <div className="text-[12px] text-center py-16" style={{ color: 'var(--text-3)' }}>불러오는 중...</div>
         ) : filtered.length === 0 ? (
           todos.length === 0 && filter === 'all' ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '48px 24px', gap: 14, textAlign: 'center' }}>
               <div style={{
-                width: 56, height: 56, borderRadius: 18,
-                background: 'rgba(10,132,255,0.06)',
-                border: '1px solid rgba(96,165,250,0.12)',
+                width: 56, height: 56, borderRadius: 'var(--r-md)',
+                background: 'var(--accent-bg)',
+                border: '1px solid var(--accent-border)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                <svg style={{ width: 26, height: 26, color: '#3b82f6' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg style={{ width: 26, height: 26, color: 'var(--accent)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
               </div>
               <div>
-                <div style={{ color: 'rgba(235,235,245,0.7)', fontSize: 14, fontWeight: 500 }}>할 일이 없어요</div>
-                <div style={{ color: 'rgba(235,235,245,0.25)', fontSize: 11, marginTop: 5, lineHeight: 1.6 }}>
+                <div style={{ color: 'var(--text-2)', fontSize: 14, fontWeight: 500 }}>할 일이 없어요</div>
+                <div style={{ color: 'var(--text-3)', fontSize: 11, marginTop: 5, lineHeight: 1.6 }}>
                   오늘 해야 할 일을 추가하거나<br />AI에게 작업 계획을 요청해보세요
                 </div>
               </div>
               <button
                 onClick={() => setShowForm(true)}
                 style={{
-                  padding: '8px 20px', borderRadius: 12, fontSize: 12, fontWeight: 600,
-                  background: '#0a84ff', border: 'none', color: 'white',
-                  cursor: 'pointer', transition: 'background 0.15s ease',
-                  boxShadow: '0 4px 16px rgba(10,132,255,0.3)',
+                  padding: '8px 20px', borderRadius: 'var(--r-sm)', fontSize: 12, fontWeight: 600,
+                  background: 'var(--accent)', border: 'none', color: 'var(--on-accent)',
+                  cursor: 'pointer', transition: 'background var(--dur-2) var(--ease)',
                 }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#0070d9'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '#0a84ff'; }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--accent-hover)'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--accent)'; }}
               >+ 첫 번째 할 일 추가</button>
             </div>
           ) : (
             <div className="text-center py-16">
-              <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center mx-auto mb-3">
-                <svg style={{ width: 16, height: 16, color: 'rgba(235,235,245,0.2)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-3" style={{ border: '1px solid var(--border-1)' }}>
+                <svg style={{ width: 16, height: 16, color: 'var(--text-3)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <div className="text-gray-500 text-[13px]">
-                {filter === 'done' ? '완료된 항목이 없어요' : '모두 완료했어요! 🎉'}
+              <div className="text-[13px]" style={{ color: 'var(--text-2)' }}>
+                {filter === 'done' ? '완료된 항목이 없어요' : '모두 완료했어요'}
               </div>
             </div>
           )
@@ -201,24 +199,20 @@ export default function TodoPage() {
             {filtered.map(todo => (
               <div
                 key={todo.id}
-                className="flex items-start gap-3 rounded-xl px-4 py-3 group"
+                className="flex items-start gap-3 px-4 py-3 group"
                 style={{
-                  background: todo.isCompleted
-                    ? '#1c1c1e'
-                    : '#1c1c1e',
-                  border: `1px solid ${todo.isCompleted ? 'rgba(255,255,255,0.04)' : (PRIORITY_COLORS[todo.priority].border + '50')}`,
-                  boxShadow: todo.isCompleted ? 'none' : '0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.03)',
-                  transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                  background: 'var(--bg-2)',
+                  borderRadius: 'var(--r-md)',
+                  border: `1px solid ${todo.isCompleted ? 'var(--border-1)' : PRIORITY_COLORS[todo.priority].border}`,
+                  transition: 'background var(--dur-2) var(--ease), border-color var(--dur-2) var(--ease)',
                 }}
                 onMouseEnter={e => {
                   if (!todo.isCompleted) {
-                    (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)';
-                    (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)';
+                    (e.currentTarget as HTMLElement).style.background = 'var(--bg-3)';
                   }
                 }}
                 onMouseLeave={e => {
-                  (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
-                  (e.currentTarget as HTMLElement).style.boxShadow = todo.isCompleted ? 'none' : '0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.03)';
+                  (e.currentTarget as HTMLElement).style.background = 'var(--bg-2)';
                 }}
               >
                 {/* Checkbox */}
@@ -226,12 +220,12 @@ export default function TodoPage() {
                   onClick={() => handleToggle(todo)}
                   className="flex-shrink-0 mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all"
                   style={todo.isCompleted
-                    ? { background: '#0062cc', borderColor: '#0062cc' }
-                    : { borderColor: '#2a3a4a' }
+                    ? { background: 'var(--accent)', borderColor: 'var(--accent)' }
+                    : { borderColor: 'var(--border-2)' }
                   }
                 >
                   {todo.isCompleted && (
-                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3" style={{ color: 'var(--on-accent)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                     </svg>
                   )}
@@ -278,13 +272,12 @@ export default function TodoPage() {
               <span className="text-gray-600 text-[10px]">진행률</span>
               <span className="text-gray-500 text-[10px]">{Math.round((doneCount / todos.length) * 100)}%</span>
             </div>
-            <div className="h-1.5 rounded-full overflow-hidden" style={{ background: '#2c2c2e', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.4)' }}>
+            <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-sunken)' }}>
               <div
                 className="h-full rounded-full transition-all duration-500"
                 style={{
                   width: `${(doneCount / todos.length) * 100}%`,
-                  background: '#0a84ff',
-                  boxShadow: '0 0 8px rgba(59,130,246,0.5)',
+                  background: 'var(--accent)',
                 }}
               />
             </div>

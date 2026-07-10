@@ -1,8 +1,11 @@
+// Category chrome — dark-premium tokens only.
+// Categories are distinguished by their label text; chrome maps to state/neutral tokens
+// (green->ok, yellow->warn) and stays neutral where no semantic color applies.
 export const CATEGORY_BG: Record<string, { bg: string; border: string; text: string }> = {
-  Meeting:    { bg: 'rgba(139,92,246,0.15)', border: 'rgba(139,92,246,0.35)', text: '#c4b5fd' },
-  Work:       { bg: 'rgba(59,130,246,0.15)',  border: 'rgba(59,130,246,0.35)',  text: 'rgba(100,181,255,0.85)' },
-  CodeReview: { bg: 'rgba(16,185,129,0.15)',  border: 'rgba(16,185,129,0.35)',  text: '#6ee7b7' },
-  Rest:       { bg: 'rgba(107,114,128,0.10)', border: 'rgba(107,114,128,0.25)', text: '#9ca3af' },
-  Personal:   { bg: 'rgba(251,191,36,0.12)',  border: 'rgba(251,191,36,0.3)',   text: '#fcd34d' },
-  Other:      { bg: 'rgba(107,114,128,0.10)', border: 'rgba(107,114,128,0.25)', text: '#9ca3af' },
+  Meeting:    { bg: 'var(--accent-bg)', border: 'var(--accent-border)', text: 'var(--accent)' },
+  Work:       { bg: 'var(--bg-3)',      border: 'var(--border-2)',      text: 'var(--text-2)' },
+  CodeReview: { bg: 'var(--ok-bg)',     border: 'var(--ok-border)',     text: 'var(--ok)' },
+  Rest:       { bg: 'var(--bg-3)',      border: 'var(--border-1)',      text: 'var(--text-3)' },
+  Personal:   { bg: 'var(--warn-bg)',   border: 'var(--warn-border)',   text: 'var(--warn)' },
+  Other:      { bg: 'var(--bg-3)',      border: 'var(--border-1)',      text: 'var(--text-3)' },
 };

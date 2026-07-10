@@ -85,13 +85,13 @@ export default function NotesPage() {
   const manualCount = notes.filter(n => n.source === 'manual').length;
 
   return (
-    <div className="flex-1 flex overflow-hidden" style={{ background: '#000000' }}>
+    <div className="flex-1 flex overflow-hidden" style={{ background: 'var(--bg-0)' }}>
 
       {/* ── 좌측: 노트 목록 ── */}
-      <div className="flex flex-col w-80 flex-shrink-0 overflow-hidden" style={{ borderRight: '1px solid rgba(255,255,255,0.05)' }}>
+      <div className="flex flex-col w-80 flex-shrink-0 overflow-hidden" style={{ borderRight: '1px solid var(--border-1)' }}>
 
         {/* 헤더 */}
-        <div className="px-4 pt-5 pb-3 flex-shrink-0" style={{ background: '#000000', boxShadow: '0 1px 0 rgba(255,255,255,0.03), 0 4px 12px rgba(0,0,0,0.2)' }}>
+        <div className="px-4 pt-5 pb-3 flex-shrink-0" style={{ background: 'var(--bg-1)' }}>
           <div className="flex items-center justify-between mb-3">
             <div>
               <div className="text-white font-semibold text-sm">노트</div>
@@ -102,9 +102,9 @@ export default function NotesPage() {
               style={{
                 width: 24, height: 24, borderRadius: '50%',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: showAddForm ? 'rgba(255,255,255,0.06)' : 'rgba(96,165,250,0.14)',
-                border: `1px solid ${showAddForm ? 'rgba(255,255,255,0.08)' : 'rgba(96,165,250,0.3)'}`,
-                color: showAddForm ? '#6b7280' : '#64b5ff',
+                background: showAddForm ? 'rgba(255,255,255,0.06)' : 'var(--accent-bg)',
+                border: `1px solid ${showAddForm ? 'var(--border-2)' : 'var(--accent-border)'}`,
+                color: showAddForm ? 'var(--text-3)' : 'var(--accent)',
                 fontSize: 16, lineHeight: 1, cursor: 'pointer',
                 transition: 'all 0.15s ease', flexShrink: 0,
               }}
@@ -126,8 +126,8 @@ export default function NotesPage() {
               placeholder="검색..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full rounded-xl text-[11px] focus:outline-none placeholder-gray-700"
-              style={{ background: '#0a1828', border: '1px solid rgba(255,255,255,0.06)', color: '#d1d5db', padding: '7px 10px 7px 27px' }}
+              className="w-full text-[11px] focus:outline-none placeholder-gray-700"
+              style={{ background: 'var(--bg-sunken)', border: '1px solid var(--border-1)', borderRadius: 'var(--r-sm)', color: 'var(--text-1)', padding: '7px 10px 7px 27px' }}
             />
           </div>
         </div>
@@ -137,9 +137,9 @@ export default function NotesPage() {
           <div
             className="mx-3 mb-3 rounded-2xl overflow-hidden flex-shrink-0"
             style={{
-              background: '#1c1c1e',
-              border: '1px solid rgba(96,165,250,0.18)',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)',
+              background: 'var(--bg-2)',
+              border: '1px solid var(--border-2)',
+              boxShadow: 'var(--shadow-overlay)',
               animation: 'bubble-pop-in 0.18s ease forwards',
             }}
           >
@@ -150,7 +150,7 @@ export default function NotesPage() {
                 value={newTitle}
                 onChange={e => setNewTitle(e.target.value)}
                 autoFocus
-                style={{ width: '100%', background: 'transparent', border: 'none', outline: 'none', color: '#f1f5f9', fontSize: 12, fontWeight: 500, caretColor: '#64b5ff' }}
+                style={{ width: '100%', background: 'transparent', border: 'none', outline: 'none', color: '#f1f5f9', fontSize: 12, fontWeight: 500, caretColor: 'var(--accent)' }}
                 className="placeholder-gray-700"
               />
             </div>
@@ -161,7 +161,7 @@ export default function NotesPage() {
                 value={newContent}
                 onChange={e => setNewContent(e.target.value)}
                 rows={3}
-                style={{ width: '100%', background: 'transparent', border: 'none', outline: 'none', color: '#6b7280', fontSize: 11, resize: 'none', caretColor: '#64b5ff' }}
+                style={{ width: '100%', background: 'transparent', border: 'none', outline: 'none', color: '#6b7280', fontSize: 11, resize: 'none', caretColor: 'var(--accent)' }}
                 className="placeholder-gray-800"
               />
             </div>
@@ -172,7 +172,7 @@ export default function NotesPage() {
                 placeholder="태그 (쉼표로 구분, 선택사항)"
                 value={newTags}
                 onChange={e => setNewTags(e.target.value)}
-                style={{ width: '100%', background: 'transparent', border: 'none', outline: 'none', color: '#4b5563', fontSize: 10, caretColor: '#64b5ff' }}
+                style={{ width: '100%', background: 'transparent', border: 'none', outline: 'none', color: '#4b5563', fontSize: 10, caretColor: 'var(--accent)' }}
                 className="placeholder-gray-800"
               />
             </div>
@@ -186,8 +186,8 @@ export default function NotesPage() {
                 disabled={!newTitle.trim() || !newContent.trim() || saving}
                 style={{
                   flex: 1, padding: '5px', borderRadius: 7, fontSize: 10, fontWeight: 600, border: 'none',
-                  background: (newTitle.trim() && newContent.trim()) ? '#0a84ff' : 'rgba(37,99,235,0.18)',
-                  color: (newTitle.trim() && newContent.trim()) ? '#fff' : 'rgba(235,235,245,0.25)',
+                  background: (newTitle.trim() && newContent.trim()) ? 'var(--accent)' : 'var(--accent-bg)',
+                  color: (newTitle.trim() && newContent.trim()) ? 'var(--on-accent)' : 'var(--text-3)',
                   cursor: (newTitle.trim() && newContent.trim()) ? 'pointer' : 'default',
                   transition: 'all 0.15s ease',
                 }}
@@ -215,61 +215,49 @@ export default function NotesPage() {
             search ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 16px 16px', gap: 12, textAlign: 'center' }}>
                 <div style={{
-                  width: 48, height: 48, borderRadius: 16,
-                  background: 'rgba(139,92,246,0.08)',
-                  border: '1px solid rgba(139,92,246,0.18)',
+                  width: 48, height: 48, borderRadius: 'var(--r-md)',
+                  background: 'var(--bg-3)',
+                  border: '1px solid var(--border-1)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
-                  <svg style={{ width: 22, height: 22, color: '#8b5cf6' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg style={{ width: 22, height: 22, color: 'var(--text-3)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                       d="M21 21l-4.35-4.35M11 19a8 8 0 110-16 8 8 0 010 16z" />
                   </svg>
                 </div>
                 <div>
-                  <div style={{ color: 'rgba(235,235,245,0.6)', fontSize: 12, fontWeight: 500 }}>일치하는 노트가 없어요</div>
-                  <div style={{ color: 'rgba(235,235,245,0.3)', fontSize: 10, marginTop: 4, lineHeight: 1.6 }}>
+                  <div style={{ color: 'var(--text-2)', fontSize: 12, fontWeight: 500 }}>일치하는 노트가 없어요</div>
+                  <div style={{ color: 'var(--text-3)', fontSize: 10, marginTop: 4, lineHeight: 1.6 }}>
                     "{search}" 검색 결과가 없어요
                   </div>
                 </div>
                 <button
                   onClick={() => setSearch('')}
-                  style={{
-                    padding: '6px 14px', borderRadius: 10, fontSize: 11, fontWeight: 500,
-                    background: 'rgba(139,92,246,0.12)', border: '1px solid rgba(139,92,246,0.24)',
-                    color: '#a78bfa', cursor: 'pointer', transition: 'background 0.15s ease',
-                  }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(139,92,246,0.2)'; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(139,92,246,0.12)'; }}
+                  className="ui-btn ui-btn-sm ui-btn-secondary"
                 >검색 초기화</button>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 16px 16px', gap: 12, textAlign: 'center' }}>
                 <div style={{
-                  width: 48, height: 48, borderRadius: 16,
-                  background: 'rgba(139,92,246,0.08)',
-                  border: '1px solid rgba(139,92,246,0.18)',
+                  width: 48, height: 48, borderRadius: 'var(--r-md)',
+                  background: 'var(--bg-3)',
+                  border: '1px solid var(--border-1)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
-                  <svg style={{ width: 24, height: 24, color: '#8b5cf6' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg style={{ width: 24, height: 24, color: 'var(--text-3)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                       d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
                 </div>
                 <div>
-                  <div style={{ color: 'rgba(235,235,245,0.6)', fontSize: 12, fontWeight: 500 }}>아직 노트가 없어요</div>
-                  <div style={{ color: 'rgba(235,235,245,0.2)', fontSize: 10, marginTop: 4, lineHeight: 1.6 }}>
+                  <div style={{ color: 'var(--text-2)', fontSize: 12, fontWeight: 500 }}>아직 노트가 없어요</div>
+                  <div style={{ color: 'var(--text-3)', fontSize: 10, marginTop: 4, lineHeight: 1.6 }}>
                     AI와 대화하거나 직접 노트를<br />작성해보세요
                   </div>
                 </div>
                 <button
                   onClick={() => { setShowAddForm(true); setSelected(null); }}
-                  style={{
-                    padding: '6px 16px', borderRadius: 10, fontSize: 10, fontWeight: 500,
-                    background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.25)',
-                    color: '#a78bfa', cursor: 'pointer', transition: 'all 0.15s ease',
-                  }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(139,92,246,0.2)'; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(139,92,246,0.1)'; }}
+                  className="ui-btn ui-btn-sm ui-btn-primary"
                 >노트 작성하기</button>
               </div>
             )
@@ -278,30 +266,22 @@ export default function NotesPage() {
               <div
                 key={n.id}
                 onClick={() => setSelected(n)}
-                className="rounded-xl p-3 cursor-pointer"
+                className="p-3 cursor-pointer"
                 style={{
-                  background: selected?.id === n.id
-                    ? 'rgba(37,37,39,0.72)'
-                    : 'rgba(28,28,30,0.72)',
-                  backdropFilter: 'blur(12px) saturate(160%)',
-                  WebkitBackdropFilter: 'blur(12px) saturate(160%)',
-                  border: selected?.id === n.id ? '1px solid rgba(96,165,250,0.25)' : '1px solid rgba(255,255,255,0.05)',
-                  boxShadow: selected?.id === n.id
-                    ? '0 0 0 1px rgba(96,165,250,0.1), 0 4px 16px rgba(37,99,235,0.1), inset 0 1px 0 rgba(255,255,255,0.04)'
-                    : '0 2px 6px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.02)',
-                  transition: 'transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease',
+                  background: selected?.id === n.id ? 'var(--bg-3)' : 'var(--bg-2)',
+                  borderRadius: 'var(--r-md)',
+                  border: selected?.id === n.id ? '1px solid var(--accent-border)' : '1px solid var(--border-1)',
+                  transition: 'background var(--dur-2) var(--ease), border-color var(--dur-2) var(--ease)',
                 }}
                 onMouseEnter={e => {
                   if (selected?.id !== n.id) {
-                    (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)';
-                    (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 12px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.07), inset 0 1px 0 rgba(255,255,255,0.04)';
+                    (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-2)';
                   }
                 }}
                 onMouseLeave={e => {
-                  (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
-                  (e.currentTarget as HTMLElement).style.boxShadow = selected?.id === n.id
-                    ? '0 0 0 1px rgba(96,165,250,0.1), 0 4px 16px rgba(37,99,235,0.1), inset 0 1px 0 rgba(255,255,255,0.04)'
-                    : '0 2px 6px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.02)';
+                  if (selected?.id !== n.id) {
+                    (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-1)';
+                  }
                 }}
               >
                 <div className="flex items-start justify-between gap-2">
@@ -319,7 +299,7 @@ export default function NotesPage() {
                     {SOURCE_LABELS[n.source] ?? n.source}
                   </span>
                   {n.tags.slice(0, 2).map(tag => (
-                    <span key={tag} className="text-[9px] px-1.5 py-0.5 rounded-full bg-violet-500/20 text-violet-400">{tag}</span>
+                    <span key={tag} className="text-[9px] px-1.5 py-0.5 rounded-full bg-white/10 text-[var(--text-2)]">{tag}</span>
                   ))}
                   <span className="text-gray-700 text-[9px]">{formatDate(n.createdAt)}</span>
                 </div>
@@ -330,7 +310,7 @@ export default function NotesPage() {
 
         {/* 하단 통계 */}
         {!loading && !error && (
-          <div className="px-4 py-3 flex-shrink-0" style={{ borderTop: '1px solid rgba(255,255,255,0.05)', background: '#000000' }}>
+          <div className="px-4 py-3 flex-shrink-0" style={{ borderTop: '1px solid var(--border-1)', background: 'var(--bg-1)' }}>
             <div className="flex gap-3">
               <div className="text-center">
                 <div className="text-white font-bold text-sm">{notes.length}</div>
@@ -363,7 +343,7 @@ export default function NotesPage() {
                       {SOURCE_LABELS[selected.source] ?? selected.source}
                     </span>
                     {selected.tags.map(tag => (
-                      <span key={tag} className="text-[9px] px-1.5 py-0.5 rounded-full bg-violet-500/20 text-violet-400">{tag}</span>
+                      <span key={tag} className="text-[9px] px-1.5 py-0.5 rounded-full bg-white/10 text-[var(--text-2)]">{tag}</span>
                     ))}
                     <span className="text-gray-600 text-[10px]">저장: {formatDate(selected.createdAt)}</span>
                     {selected.updatedAt !== selected.createdAt && (
@@ -387,24 +367,23 @@ export default function NotesPage() {
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
               <div style={{
-                width: 52, height: 52, borderRadius: 16,
-                background: 'linear-gradient(135deg, rgba(139,92,246,0.12) 0%, rgba(109,40,217,0.06) 100%)',
-                border: '1px solid rgba(196,181,253,0.15)',
-                boxShadow: '0 0 24px rgba(139,92,246,0.1)',
+                width: 52, height: 52, borderRadius: 'var(--r-md)',
+                background: 'var(--bg-3)',
+                border: '1px solid var(--border-1)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 margin: '0 auto 16px',
               }}>
-                <svg style={{ width: 24, height: 24, color: '#c4b5fd' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg style={{ width: 24, height: 24, color: 'var(--text-3)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <div style={{ color: '#9ca3af', fontSize: 13, fontWeight: 500 }}>노트를 선택하세요</div>
-              <div style={{ color: 'rgba(235,235,245,0.25)', fontSize: 11, marginTop: 4 }}>AI와 대화하면 중요한 내용이 자동으로 저장됩니다</div>
+              <div style={{ color: 'var(--text-2)', fontSize: 13, fontWeight: 500 }}>노트를 선택하세요</div>
+              <div style={{ color: 'var(--text-3)', fontSize: 11, marginTop: 4 }}>AI와 대화하면 중요한 내용이 자동으로 저장됩니다</div>
               <div style={{
-                marginTop: 16, padding: '8px 14px', borderRadius: 10,
-                background: 'rgba(139,92,246,0.06)', border: '1px solid rgba(196,181,253,0.1)',
-                color: '#4a5d7a', fontSize: 10, lineHeight: 1.6,
+                marginTop: 16, padding: '8px 14px', borderRadius: 'var(--r-sm)',
+                background: 'var(--bg-sunken)', border: '1px solid var(--border-1)',
+                color: 'var(--text-3)', fontSize: 10, lineHeight: 1.6,
               }}>
                 + 버튼으로 직접 노트를 작성할 수도 있어요
               </div>

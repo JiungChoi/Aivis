@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import WireframeGlobe from './WireframeGlobe';
+import './holo.css';
 
 // ── Waveform bars (canvas) ─────────────────────────────────────
 
@@ -53,9 +54,10 @@ function WaveformBars({ isRecording, isSpeaking, containerWidth }: WaveformProps
         grad.addColorStop(0.5, `rgba(255,120,60,0.7)`);
         grad.addColorStop(1, `rgba(255,60,60,0.2)`);
       } else {
-        grad.addColorStop(0, `rgba(6,182,212,0.95)`);
-        grad.addColorStop(0.5, `rgba(59,130,246,0.75)`);
-        grad.addColorStop(1, `rgba(6,182,212,0.15)`);
+        // Idle: accent-derived (var(--accent) #5E9EFF family)
+        grad.addColorStop(0, `rgba(94,158,255,0.9)`);
+        grad.addColorStop(0.5, `rgba(125,177,255,0.7)`);
+        grad.addColorStop(1, `rgba(94,158,255,0.12)`);
       }
 
       ctx.fillStyle = grad;
@@ -63,8 +65,9 @@ function WaveformBars({ isRecording, isSpeaking, containerWidth }: WaveformProps
       ctx.roundRect(x, y, BAR_WIDTH, barHeight, 2);
       ctx.fill();
 
+      // Ambient floor glow, ~50% attenuated
       const glowGrad = ctx.createLinearGradient(x, H - 8, x, H);
-      glowGrad.addColorStop(0, isRecording ? 'rgba(255,80,0,0.25)' : 'rgba(6,182,212,0.25)');
+      glowGrad.addColorStop(0, isRecording ? 'rgba(255,80,0,0.12)' : 'rgba(94,158,255,0.12)');
       glowGrad.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = glowGrad;
       ctx.fillRect(x - 1, H - 8, BAR_WIDTH + 2, 8);
@@ -107,8 +110,9 @@ function AivisSpeechBubble({ text, sidebarWidth, rightAligned }: {
   text: string; sidebarWidth: number; rightAligned?: boolean;
 }) {
   const [displayed, setDisplayed] = useState('');
-  const C  = '#00cfff';
-  const C2 = '#4af4ff';
+  // Accent-derived holo palette (var(--accent) / var(--accent-hover))
+  const C  = '#5E9EFF';
+  const C2 = '#7DB1FF';
 
   useEffect(() => {
     setDisplayed('');
@@ -132,7 +136,7 @@ function AivisSpeechBubble({ text, sidebarWidth, rightAligned }: {
       background: '#020d18',
       border: `1px solid ${C}60`,
       borderRadius: 10,
-      boxShadow: `0 0 20px ${C}30, 0 4px 24px rgba(0,0,0,0.6)`,
+      boxShadow: `0 0 20px ${C}18, 0 4px 24px rgba(0,0,0,0.6)`,
       animation: 'bubble-pop-in 0.3s ease forwards',
       pointerEvents: 'none',
     }}>
@@ -155,10 +159,10 @@ function AivisSpeechBubble({ text, sidebarWidth, rightAligned }: {
         }} />
       )}
       <div style={{ color: C2, fontSize: 10, fontWeight: 700, marginBottom: 4,
-        letterSpacing: 1, textShadow: `0 0 8px ${C}` }}>
+        letterSpacing: 1, textShadow: `0 0 8px ${C}80` }}>
         AIVIS
       </div>
-      <p style={{ color: '#c0f0ff', fontSize: 11, lineHeight: 1.5, margin: 0 }}>
+      <p style={{ color: '#cfe0ff', fontSize: 11, lineHeight: 1.5, margin: 0 }}>
         {displayed}
         {displayed.length < text.length && <span style={{ color: C, opacity: 0.8 }}>|</span>}
       </p>

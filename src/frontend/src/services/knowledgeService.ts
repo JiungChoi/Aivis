@@ -13,7 +13,6 @@ export interface KnowledgeBranch {
   id: string;
   label: string;
   color: string;
-  gradientEnd: string;
   angle: number; // degrees from top (0 = up, clockwise)
   nodes: KnowledgeNode[];
 }
@@ -30,7 +29,6 @@ const STATIC_BRANCHES: KnowledgeBranch[] = [
     id: 'memory',
     label: '기억·개념',
     color: '#a855f7',
-    gradientEnd: '#7c3aed',
     angle: -40,
     nodes: [
       { id: 'm1', branchId: 'memory', label: '주요 프레임워크', sublabel: 'React, Spring, Kotlin, C#', weight: 0.85, source: 'static' },
@@ -42,7 +40,6 @@ const STATIC_BRANCHES: KnowledgeBranch[] = [
     id: 'tech',
     label: '기술·역량',
     color: '#22d3ee',
-    gradientEnd: '#0891b2',
     angle: 30,
     nodes: [
       { id: 't1', branchId: 'tech', label: 'AWS 클라우드 인프라', weight: 0.85, source: 'static' },
@@ -55,7 +52,6 @@ const STATIC_BRANCHES: KnowledgeBranch[] = [
     id: 'project',
     label: '프로젝트',
     color: '#fb923c',
-    gradientEnd: '#ea580c',
     angle: 100,
     nodes: [
       { id: 'p1', branchId: 'project', label: 'AIVIS 개인비서', sublabel: '현재 진행중', weight: 1.0, source: 'static' },
@@ -68,7 +64,6 @@ const STATIC_BRANCHES: KnowledgeBranch[] = [
     id: 'life',
     label: '라이프 & 개인',
     color: '#f472b6',
-    gradientEnd: '#db2777',
     angle: 155,
     nodes: [
       { id: 'lf1', branchId: 'life', label: '운동 관리', sublabel: 'Gym, 헬스', weight: 0.7, source: 'static' },
@@ -81,7 +76,6 @@ const STATIC_BRANCHES: KnowledgeBranch[] = [
     id: 'learning',
     label: '기술 & 학습',
     color: '#60a5fa',
-    gradientEnd: '#2563eb',
     angle: 218,
     nodes: [
       { id: 'l1', branchId: 'learning', label: 'AI·에이전트 트렌드', weight: 0.9, source: 'static' },
@@ -94,7 +88,6 @@ const STATIC_BRANCHES: KnowledgeBranch[] = [
     id: 'global',
     label: '글로벌·외국어',
     color: '#34d399',
-    gradientEnd: '#059669',
     angle: 278,
     nodes: [
       { id: 'g1', branchId: 'global', label: '영어 비즈니스', sublabel: 'Communication', weight: 0.8, source: 'static' },

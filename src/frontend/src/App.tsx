@@ -52,7 +52,7 @@ export default function App() {
   const CurrentPage = PAGES[currentPage];
 
   return (
-    <div className="flex h-screen text-white overflow-hidden" style={{ background: '#000000' }}>
+    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-0)', color: 'var(--text-1)' }}>
       <NavBar currentPage={currentPage} onNavigate={setCurrentPage} />
       {/* Main content: relative so CharacterLayer can position absolutely inside */}
       <div className="flex-1 relative overflow-hidden">
