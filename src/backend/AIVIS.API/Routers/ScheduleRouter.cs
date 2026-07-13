@@ -18,9 +18,11 @@ public static class ScheduleRouter
             CancellationToken ct) =>
         {
             var userId = ctx.Request.GetUserId();
-            var targetDate = string.IsNullOrWhiteSpace(date)
-                ? DateOnly.FromDateTime(DateTime.Today)
-                : DateOnly.Parse(date);
+            DateOnly targetDate;
+            if (string.IsNullOrWhiteSpace(date))
+                targetDate = DateOnly.FromDateTime(DateTime.Today);
+            else if (!DateOnly.TryParse(date, out targetDate))
+                return Results.BadRequest(ApiResponse.FailResult("INVALID_FORMAT", $"Invalid date format: '{date}'. Expected yyyy-MM-dd."));
 
             var schedules = await scheduleRepository.GetByDateAsync(userId, targetDate, ct);
             return Results.Ok(ApiResponse<List<ScheduleDto>>.Ok(schedules.Select(ToDto).ToList()));
@@ -51,14 +53,18 @@ public static class ScheduleRouter
             CancellationToken ct) =>
         {
             var userId = ctx.Request.GetUserId();
+            if (!TryParseScheduleFields(request.Date, request.StartTime, request.EndTime,
+                    out var parsedDate, out var parsedStart, out var parsedEnd, out var error))
+                return Results.BadRequest(ApiResponse.FailResult("INVALID_FORMAT", error));
+
             var category = ParseCategory(request.Category);
             var schedule = new Schedule
             {
                 Id          = Guid.NewGuid(),
                 UserId      = userId,
-                Date        = DateOnly.Parse(request.Date),
-                StartTime   = TimeOnly.Parse(request.StartTime),
-                EndTime     = string.IsNullOrWhiteSpace(request.EndTime) ? null : TimeOnly.Parse(request.EndTime),
+                Date        = parsedDate,
+                StartTime   = parsedStart,
+                EndTime     = parsedEnd,
                 Title       = request.Title,
                 Description = request.Description,
                 Category    = category,
@@ -81,10 +87,14 @@ public static class ScheduleRouter
             if (schedule is null)
                 return Results.NotFound(ApiResponse.FailResult("NOT_FOUND", "Schedule not found"));
 
+            if (!TryParseScheduleFields(request.Date, request.StartTime, request.EndTime,
+                    out var parsedDate, out var parsedStart, out var parsedEnd, out var error))
+                return Results.BadRequest(ApiResponse.FailResult("INVALID_FORMAT", error));
+
             var category = ParseCategory(request.Category);
-            schedule.Date        = DateOnly.Parse(request.Date);
-            schedule.StartTime   = TimeOnly.Parse(request.StartTime);
-            schedule.EndTime     = string.IsNullOrWhiteSpace(request.EndTime) ? null : TimeOnly.Parse(request.EndTime);
+            schedule.Date        = parsedDate;
+            schedule.StartTime   = parsedStart;
+            schedule.EndTime     = parsedEnd;
             schedule.Title       = request.Title;
             schedule.Description = request.Description;
             schedule.Category    = category;
@@ -105,6 +115,36 @@ public static class ScheduleRouter
         });
 
         return app;
+    }
+
+    private static bool TryParseScheduleFields(
+        string date, string startTime, string? endTime,
+        out DateOnly parsedDate, out TimeOnly parsedStart, out TimeOnly? parsedEnd, out string error)
+    {
+        parsedStart = default;
+        parsedEnd = null;
+        error = string.Empty;
+
+        if (!DateOnly.TryParse(date, out parsedDate))
+        {
+            error = $"Invalid date format: '{date}'. Expected yyyy-MM-dd.";
+            return false;
+        }
+        if (!TimeOnly.TryParse(startTime, out parsedStart))
+        {
+            error = $"Invalid startTime format: '{startTime}'. Expected HH:mm.";
+            return false;
+        }
+        if (!string.IsNullOrWhiteSpace(endTime))
+        {
+            if (!TimeOnly.TryParse(endTime, out var end))
+            {
+                error = $"Invalid endTime format: '{endTime}'. Expected HH:mm.";
+                return false;
+            }
+            parsedEnd = end;
+        }
+        return true;
     }
 
     private static ScheduleCategory ParseCategory(string? value)
