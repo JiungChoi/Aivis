@@ -4,87 +4,7 @@ import { useVoiceInput } from '../../hooks/useVoiceInput';
 import { voiceService } from '../../services/voiceService';
 import { conversationService } from '../../services/conversationService';
 import HoloJarvis from './HoloJarvis';
-
-// ── Chat markdown renderer ────────────────────────────────────────────
-function ChatInline({ text }: { text: string }) {
-  const parts = text.split(/(\*\*[^*\n]+\*\*|`[^`\n]+`|\*[^*\n]+\*)/);
-  return (
-    <>
-      {parts.map((p, i) => {
-        if (p.startsWith('**') && p.endsWith('**') && p.length > 4)
-          return <strong key={i} style={{ fontWeight: 600 }}>{p.slice(2, -2)}</strong>;
-        if (p.startsWith('`') && p.endsWith('`') && p.length > 2)
-          return (
-            <code key={i} style={{
-              background: 'rgba(0,0,0,0.35)', borderRadius: 'var(--r-sm)',
-              padding: '1px 4px', fontSize: '0.88em',
-              fontFamily: 'ui-monospace, monospace', color: 'var(--accent)',
-            }}>{p.slice(1, -1)}</code>
-          );
-        if (p.startsWith('*') && p.endsWith('*') && p.length > 2)
-          return <em key={i} style={{ color: 'var(--text-2)' }}>{p.slice(1, -1)}</em>;
-        return <span key={i}>{p}</span>;
-      })}
-    </>
-  );
-}
-
-function ChatMarkdown({ content }: { content: string }) {
-  const lines = content.split('\n');
-  const nodes: React.ReactNode[] = [];
-  let i = 0;
-
-  while (i < lines.length) {
-    const line = lines[i];
-
-    if (line.startsWith('```')) {
-      const codeLines: string[] = [];
-      i++;
-      while (i < lines.length && !lines[i].startsWith('```')) {
-        codeLines.push(lines[i]);
-        i++;
-      }
-      nodes.push(
-        <pre key={nodes.length} style={{
-          background: 'rgba(0,0,0,0.35)', borderRadius: 'var(--r-sm)', padding: '8px 10px',
-          fontSize: 11, color: 'var(--accent)', overflowX: 'auto',
-          fontFamily: 'ui-monospace, monospace', lineHeight: 1.55, margin: '3px 0',
-        }}>
-          <code>{codeLines.join('\n')}</code>
-        </pre>,
-      );
-    } else if (line.startsWith('### ') || line.startsWith('## ')) {
-      const lvl = line.startsWith('### ') ? 4 : 3;
-      nodes.push(
-        <div key={nodes.length} style={{ fontWeight: 600, color: 'var(--text-1)', fontSize: 12, marginTop: 5 }}>
-          <ChatInline text={line.slice(lvl)} />
-        </div>,
-      );
-    } else if (/^[-*] /.test(line)) {
-      nodes.push(
-        <div key={nodes.length} style={{ display: 'flex', gap: 5, alignItems: 'flex-start' }}>
-          <span style={{ color: 'var(--accent)', fontSize: 11, marginTop: 2, flexShrink: 0 }}>•</span>
-          <span><ChatInline text={line.slice(2)} /></span>
-        </div>,
-      );
-    } else if (/^\d+\. /.test(line)) {
-      const num = line.match(/^(\d+)\./)?.[1] ?? '1';
-      nodes.push(
-        <div key={nodes.length} style={{ display: 'flex', gap: 5, alignItems: 'flex-start' }}>
-          <span style={{ color: 'var(--accent)', fontSize: 11, marginTop: 2, flexShrink: 0, minWidth: 12 }}>{num}.</span>
-          <span><ChatInline text={line.slice(num.length + 2)} /></span>
-        </div>,
-      );
-    } else if (line.trim() === '') {
-      if (nodes.length > 0) nodes.push(<div key={nodes.length} style={{ height: 4 }} />);
-    } else {
-      nodes.push(<div key={nodes.length}><ChatInline text={line} /></div>);
-    }
-    i++;
-  }
-
-  return <div style={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>{nodes}</div>;
-}
+import { RenderMarkdown } from '../markdown/Markdown';
 
 // ── GlobalChatPanel ───────────────────────────────────────────────────
 const PANEL_WIDTH = 250;
@@ -400,7 +320,7 @@ export default function GlobalChatPanel() {
                 }}>
                   {msg.content
                     ? msg.role === 'assistant'
-                      ? <ChatMarkdown content={msg.content} />
+                      ? <RenderMarkdown text={msg.content} variant="compact" />
                       : msg.content
                     : (
                       <span style={{ display: 'flex', gap: 4, alignItems: 'center', padding: '2px 0' }}>
