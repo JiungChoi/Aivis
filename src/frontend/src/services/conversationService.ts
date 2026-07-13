@@ -108,6 +108,9 @@ export const conversationService = {
             if (payload.tool_call && onToolCall) onToolCall(payload.display ?? payload.tool_call);
           }
         }
+
+        // Stream closed without a done event (network drop, backend restart, proxy timeout)
+        reject(new Error('stream ended unexpectedly'));
       } catch (err) {
         reject(err);
       }
