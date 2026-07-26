@@ -155,13 +155,18 @@ export function ScheduleTimeline({
     if (sugRaw) {
       const { title, index } = JSON.parse(sugRaw) as { title: string; index: number };
       const endMins = Math.min(dropMins + 60, 24 * 60);
-      await scheduleService.create({
-        date: today, startTime: minsToTimeStr(dropMins), endTime: minsToTimeStr(endMins),
-        title, category: 'Work',
-      });
-      setSchedule(await scheduleService.getByDate(today));
-      removeSuggestion(index);
-      toast.success('일정을 추가했습니다');
+      try {
+        await scheduleService.create({
+          date: today, startTime: minsToTimeStr(dropMins), endTime: minsToTimeStr(endMins),
+          title, category: 'Work',
+        });
+        setSchedule(await scheduleService.getByDate(today));
+        removeSuggestion(index);
+        toast.success('일정을 추가했습니다');
+      } catch {
+        setSchedule(await scheduleService.getByDate(today).catch(() => schedule));
+        toast.error('일정을 추가하지 못했습니다');
+      }
       return;
     }
 
@@ -174,16 +179,21 @@ export function ScheduleTimeline({
       const endMins = item.endTime ? toMins(item.endTime) : startMins + 60;
       const duration = endMins - startMins;
       const newEndMins = Math.min(dropMins + duration, 24 * 60);
-      await scheduleService.update(item.id, {
-        date: item.date,
-        startTime: minsToTimeStr(dropMins),
-        endTime: minsToTimeStr(newEndMins),
-        title: item.title,
-        category: item.category,
-        description: item.description,
-      });
-      setSchedule(await scheduleService.getByDate(item.date));
-      toast.success('일정을 옮겼습니다');
+      try {
+        await scheduleService.update(item.id, {
+          date: item.date,
+          startTime: minsToTimeStr(dropMins),
+          endTime: minsToTimeStr(newEndMins),
+          title: item.title,
+          category: item.category,
+          description: item.description,
+        });
+        setSchedule(await scheduleService.getByDate(item.date));
+        toast.success('일정을 옮겼습니다');
+      } catch {
+        setSchedule(await scheduleService.getByDate(item.date).catch(() => schedule));
+        toast.error('일정을 옮기지 못했습니다');
+      }
     }
   }
 
